@@ -1,0 +1,54 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #000;
+  color: #fff;
+}
+
+.App {
+  min-height: 100vh;
+}
+
+/* Basic styling for Twitter-like theme */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #1d9bf0;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1a8cd8;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #1d9bf0;
+  border: 1px solid #1d9bf0;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(29, 155, 240, 0.1);
+}

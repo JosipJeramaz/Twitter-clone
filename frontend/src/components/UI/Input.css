@@ -1,0 +1,79 @@
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-label {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.input-required {
+  color: #f4212e;
+  margin-left: 2px;
+}
+
+.input {
+  width: 100%;
+  padding: 16px;
+  background-color: transparent;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 15px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: #71767b;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #1d9bf0;
+}
+
+.input:hover:not(.input-disabled) {
+  border-color: #71767b;
+}
+
+.input-error {
+  border-color: #f4212e;
+}
+
+.input-error:focus {
+  border-color: #f4212e;
+}
+
+.input-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.input-error-message {
+  color: #f4212e;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Specific input types */
+.input[type="password"] {
+  letter-spacing: 0.3em;
+}
+
+.input[type="password"]::placeholder {
+  letter-spacing: normal;
+}
+
+/* Auto-fill styles */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #000 inset !important;
+  -webkit-text-fill-color: #fff !important;
+}
