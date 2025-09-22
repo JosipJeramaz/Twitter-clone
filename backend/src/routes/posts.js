@@ -1,113 +1,54 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
-const db = require('../config/database');
+const { PostController } = require('../controllers');
 const auth = require('../middleware/auth');
+const { 
+  createPostValidation,
+  updatePostValidation,
+  idValidation,
+  userIdValidation,
+  paginationValidation,
+  searchValidation
+} = require('../middleware/validation');
 
 const router = express.Router();
 
-// Get all posts
-router.get('/', async (req, res) => {
-  try {
-    const [posts] = await db.execute(
-      `SELECT p.id, p.content, p.likes_count, p.comments_count, p.created_at,
-              u.id as user_id, u.username, u.full_name
-       FROM posts p
-       JOIN users u ON p.user_id = u.id
-       ORDER BY p.created_at DESC
-       LIMIT 50`
-    );
+// Create new post
+router.post('/', auth, createPostValidation, PostController.createPost);
 
-    res.json({ posts });
-  } catch (error) {
-    console.error('Get posts error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// Get public timeline
+router.get('/timeline', paginationValidation, PostController.getPublicTimeline);
 
-// Create post
-router.post('/', auth, [
-  body('content').isLength({ min: 1, max: 280 }).trim()
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        error: 'Validation failed', 
-        details: errors.array() 
-      });
-    }
+// Get user's feed (following posts)
+router.get('/feed', auth, paginationValidation, PostController.getFeed);
 
-    const { content } = req.body;
-    const userId = req.user.userId;
+// Search posts
+router.get('/search', searchValidation, paginationValidation, PostController.searchPosts);
 
-    // Create post
-    const [result] = await db.execute(
-      'INSERT INTO posts (user_id, content) VALUES (?, ?)',
-      [userId, content]
-    );
+// Get post by ID
+router.get('/:id', idValidation, PostController.getPost);
 
-    // Update user's post count
-    await db.execute(
-      'UPDATE users SET posts_count = posts_count + 1 WHERE id = ?',
-      [userId]
-    );
-
-    // Get created post with user info
-    const [posts] = await db.execute(
-      `SELECT p.id, p.content, p.likes_count, p.comments_count, p.created_at,
-              u.id as user_id, u.username, u.full_name
-       FROM posts p
-       JOIN users u ON p.user_id = u.id
-       WHERE p.id = ?`,
-      [result.insertId]
-    );
-
-    res.status(201).json({
-      message: 'Post created successfully',
-      post: posts[0]
-    });
-
-  } catch (error) {
-    console.error('Create post error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// Update post
+router.put('/:id', auth, idValidation, updatePostValidation, PostController.updatePost);
 
 // Delete post
-router.delete('/:id', auth, async (req, res) => {
-  try {
-    const postId = req.params.id;
-    const userId = req.user.userId;
+router.delete('/:id', auth, idValidation, PostController.deletePost);
 
-    // Check if post exists and belongs to user
-    const [posts] = await db.execute(
-      'SELECT id, user_id FROM posts WHERE id = ?',
-      [postId]
-    );
+// Like post
+router.post('/:id/like', auth, idValidation, PostController.likePost);
 
-    if (posts.length === 0) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
+// Unlike post
+router.delete('/:id/like', auth, idValidation, PostController.unlikePost);
 
-    if (posts[0].user_id !== userId) {
-      return res.status(403).json({ error: 'Not authorized to delete this post' });
-    }
+// Get post likes
+router.get('/:id/likes', idValidation, paginationValidation, PostController.getPostLikes);
 
-    // Delete post
-    await db.execute('DELETE FROM posts WHERE id = ?', [postId]);
+// Check like status
+router.get('/:id/like-status', auth, idValidation, PostController.checkLikeStatus);
 
-    // Update user's post count
-    await db.execute(
-      'UPDATE users SET posts_count = posts_count - 1 WHERE id = ?',
-      [userId]
-    );
+// Get user's posts
+router.get('/user/:userId', userIdValidation, paginationValidation, PostController.getUserPosts);
 
-    res.json({ message: 'Post deleted successfully' });
-
-  } catch (error) {
-    console.error('Delete post error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// Get user's liked posts
+router.get('/user/:userId/liked', userIdValidation, paginationValidation, PostController.getUserLikedPosts);
 
 module.exports = router;

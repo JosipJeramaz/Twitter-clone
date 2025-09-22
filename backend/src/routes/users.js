@@ -1,75 +1,47 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
-const db = require('../config/database');
+const { UserController } = require('../controllers');
 const auth = require('../middleware/auth');
+const { 
+  updateProfileValidation,
+  idValidation,
+  userIdValidation,
+  paginationValidation,
+  searchValidation
+} = require('../middleware/validation');
 
 const router = express.Router();
 
-// Get user profile
-router.get('/profile/:username', async (req, res) => {
-  try {
-    const { username } = req.params;
+// Get current user profile
+router.get('/me', auth, UserController.getProfile);
 
-    const [users] = await db.execute(
-      `SELECT id, username, email, full_name, bio, location, website, 
-              followers_count, following_count, posts_count, created_at 
-       FROM users WHERE username = ?`,
-      [username]
-    );
+// Update current user profile
+router.put('/me', auth, updateProfileValidation, UserController.updateProfile);
 
-    if (users.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+// Get user profile by ID
+router.get('/:id', idValidation, UserController.getProfile);
 
-    res.json(users[0]);
-  } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// Follow user
+router.post('/:id/follow', auth, idValidation, UserController.followUser);
 
-// Update user profile
-router.put('/profile', auth, [
-  body('full_name').optional().trim().escape(),
-  body('bio').optional().trim(),
-  body('location').optional().trim().escape(),
-  body('website').optional().isURL().trim()
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        error: 'Validation failed', 
-        details: errors.array() 
-      });
-    }
+// Unfollow user
+router.delete('/:id/follow', auth, idValidation, UserController.unfollowUser);
 
-    const { full_name, bio, location, website } = req.body;
-    const userId = req.user.userId;
+// Get user followers
+router.get('/:id/followers', idValidation, paginationValidation, UserController.getFollowers);
 
-    await db.execute(
-      `UPDATE users SET full_name = ?, bio = ?, location = ?, website = ?, 
-       updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-      [full_name || null, bio || null, location || null, website || null, userId]
-    );
+// Get user following
+router.get('/:id/following', idValidation, paginationValidation, UserController.getFollowing);
 
-    // Get updated user
-    const [users] = await db.execute(
-      `SELECT id, username, email, full_name, bio, location, website, 
-              followers_count, following_count, posts_count, created_at 
-       FROM users WHERE id = ?`,
-      [userId]
-    );
+// Check follow status
+router.get('/:id/follow-status', auth, idValidation, UserController.checkFollowStatus);
 
-    res.json({
-      message: 'Profile updated successfully',
-      user: users[0]
-    });
+// Get mutual follows
+router.get('/:id/mutual', idValidation, paginationValidation, UserController.getMutualFollows);
 
-  } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+// Search users
+router.get('/search/users', searchValidation, paginationValidation, UserController.searchUsers);
+
+// Get follow suggestions
+router.get('/suggestions/follow', auth, UserController.getFollowSuggestions);
 
 module.exports = router;
