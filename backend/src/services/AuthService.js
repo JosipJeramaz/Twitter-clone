@@ -1,10 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { UserRepository } = require('../repositories');
 
 class AuthService {
-  constructor() {
-    this.userRepository = new UserRepository();
+  constructor(userRepository) {
+    if (!userRepository) {
+      throw new Error('UserRepository is required for AuthService');
+    }
+    this.userRepository = userRepository;
   }
 
   // Register new user

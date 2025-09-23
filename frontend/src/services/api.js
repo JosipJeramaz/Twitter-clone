@@ -39,12 +39,12 @@ api.interceptors.response.use(
 export const authService = {
   login: async (email, password) => {
     const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });
-    return response.data;
+    return response.data.data;
   },
 
   register: async (userData) => {
     const response = await api.post(API_ENDPOINTS.AUTH.REGISTER, userData);
-    return response.data;
+    return response.data.data;
   },
 
   logout: async () => {
@@ -53,8 +53,8 @@ export const authService = {
   },
 
   verifyToken: async () => {
-    const response = await api.get('/auth/verify');
-    return response.data;
+    const response = await api.get(API_ENDPOINTS.AUTH.VERIFY);
+    return response.data.data.user;
   }
 };
 

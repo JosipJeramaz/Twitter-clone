@@ -1,8 +1,6 @@
-const { PostService } = require('../services');
-
 class PostController {
-  constructor() {
-    this.postService = new PostService();
+  constructor(postService) {
+    this.postService = postService;
   }
 
   // Create new post
@@ -239,4 +237,4 @@ class PostController {
   };
 }
 
-module.exports = new PostController();
+module.exports = PostController;

@@ -1,10 +1,17 @@
-const { PostRepository, LikeRepository, UserRepository } = require('../repositories');
-
 class PostService {
-  constructor() {
-    this.postRepository = new PostRepository();
-    this.likeRepository = new LikeRepository();
-    this.userRepository = new UserRepository();
+  constructor(postRepository, likeRepository, userRepository) {
+    if (!postRepository) {
+      throw new Error('PostRepository is required for PostService');
+    }
+    if (!likeRepository) {
+      throw new Error('LikeRepository is required for PostService');
+    }
+    if (!userRepository) {
+      throw new Error('UserRepository is required for PostService');
+    }
+    this.postRepository = postRepository;
+    this.likeRepository = likeRepository;
+    this.userRepository = userRepository;
   }
 
   // Create new post

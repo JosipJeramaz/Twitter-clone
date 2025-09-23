@@ -1,8 +1,6 @@
-const { UserService } = require('../services');
-
 class UserController {
-  constructor() {
-    this.userService = new UserService();
+  constructor(userService) {
+    this.userService = userService;
   }
 
   // Get user profile
@@ -191,4 +189,4 @@ class UserController {
   };
 }
 
-module.exports = new UserController();
+module.exports = UserController;

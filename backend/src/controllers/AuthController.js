@@ -1,8 +1,9 @@
-const { AuthService } = require('../services');
-
 class AuthController {
-  constructor() {
-    this.authService = new AuthService();
+  constructor(authService) {
+    if (!authService) {
+      throw new Error('AuthService is required for AuthController');
+    }
+    this.authService = authService;
   }
 
   // Register new user
@@ -101,4 +102,4 @@ class AuthController {
   };
 }
 
-module.exports = new AuthController();
+module.exports = AuthController;

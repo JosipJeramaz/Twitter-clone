@@ -1,9 +1,13 @@
-const { UserRepository, FollowRepository } = require('../repositories');
-
 class UserService {
-  constructor() {
-    this.userRepository = new UserRepository();
-    this.followRepository = new FollowRepository();
+  constructor(userRepository, followRepository) {
+    if (!userRepository) {
+      throw new Error('UserRepository is required for UserService');
+    }
+    if (!followRepository) {
+      throw new Error('FollowRepository is required for UserService');
+    }
+    this.userRepository = userRepository;
+    this.followRepository = followRepository;
   }
 
   // Get user profile

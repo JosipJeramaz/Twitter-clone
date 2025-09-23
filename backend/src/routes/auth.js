@@ -1,5 +1,4 @@
 const express = require('express');
-const { AuthController } = require('../controllers');
 const auth = require('../middleware/auth');
 const { 
   registerValidation, 
@@ -7,21 +6,31 @@ const {
   changePasswordValidation 
 } = require('../middleware/validation');
 
-const router = express.Router();
+/**
+ * Create auth routes with dependency injection
+ * @param {DIContainer} container - The DI container
+ * @returns {Router} Express router with auth routes
+ */
+function createAuthRoutes(container) {
+  const router = express.Router();
+  const authController = container.resolve('authController');
 
-// Register
-router.post('/register', registerValidation, AuthController.register);
+  // Register
+  router.post('/register', registerValidation, authController.register);
 
-// Login
-router.post('/login', loginValidation, AuthController.login);
+  // Login
+  router.post('/login', loginValidation, authController.login);
 
-// Verify token
-router.get('/verify', AuthController.verifyToken);
+  // Verify token
+  router.get('/verify', authController.verifyToken);
 
-// Change password
-router.put('/change-password', auth, changePasswordValidation, AuthController.changePassword);
+  // Change password
+  router.put('/change-password', auth, changePasswordValidation, authController.changePassword);
 
-// Logout (client-side token removal)
-router.post('/logout', AuthController.logout);
+  // Logout (client-side token removal)
+  router.post('/logout', authController.logout);
 
-module.exports = router;
+  return router;
+}
+
+module.exports = createAuthRoutes;

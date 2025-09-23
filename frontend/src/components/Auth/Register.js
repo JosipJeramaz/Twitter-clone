@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Button from '../UI/Button';
@@ -15,8 +15,15 @@ const Register = () => {
     full_name: ''
   });
   const [validationError, setValidationError] = useState('');
-  const { register, loading, error, clearError } = useAuth();
+  const { register, loading, error, clearError, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(ROUTES.DASHBOARD);
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

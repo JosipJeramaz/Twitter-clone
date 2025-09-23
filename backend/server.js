@@ -4,13 +4,17 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const authRoutes = require('./src/routes/auth');
-const userRoutes = require('./src/routes/users');
-const postRoutes = require('./src/routes/posts');
+const { configureDependencies } = require('./src/config/dependencies');
+const createAuthRoutes = require('./src/routes/auth');
+const createUserRoutes = require('./src/routes/users');
+const createPostRoutes = require('./src/routes/posts');
 const { errorHandler, notFoundHandler } = require('./src/middleware/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Configure dependency injection
+const container = configureDependencies();
 
 // Security middleware
 app.use(helmet());
@@ -38,9 +42,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
 // API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/posts', postRoutes);
+app.use('/api/auth', createAuthRoutes(container));
+app.use('/api/users', createUserRoutes(container));
+app.use('/api/posts', createPostRoutes(container));
 
 // Health check
 app.get('/api/health', (req, res) => {
