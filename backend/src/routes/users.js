@@ -23,6 +23,9 @@ function createUserRoutes(container) {
   // Update current user profile
   router.put('/me', auth, updateProfileValidation, userController.updateProfile);
 
+  // Get user profile by username
+  router.get('/username/:username', userController.getProfileByUsername);
+
   // Get user profile by ID
   router.get('/:id', idValidation, userController.getProfile);
 

@@ -3,10 +3,10 @@ class UserController {
     this.userService = userService;
   }
 
-  // Get user profile
+  // Get user profile by ID
   getProfile = async (req, res, next) => {
     try {
-      const userId = req.params.id || req.user.id;
+      const userId = parseInt(req.params.id) || req.user.id;
       const user = await this.userService.getUserProfile(userId);
       
       res.status(200).json({
@@ -18,9 +18,34 @@ class UserController {
     }
   };
 
+  // Get user profile by username
+  getProfileByUsername = async (req, res, next) => {
+    try {
+      const { username } = req.params;
+      console.log('🔍 UserController.getProfileByUsername:');
+      console.log('  - Received username:', username);
+      console.log('  - req.params:', req.params);
+      
+      const user = await this.userService.getUserProfileByUsername(username);
+      console.log('✅ Found user:', user);
+      
+      res.status(200).json({
+        success: true,
+        data: { user }
+      });
+    } catch (error) {
+      console.error('❌ Error in getProfileByUsername:', error.message);
+      next(error);
+    }
+  };
+
   // Update user profile
   updateProfile = async (req, res, next) => {
     try {
+      console.log('🔧 UserController.updateProfile called');
+      console.log('  - User ID:', req.user?.id);
+      console.log('  - Request body:', req.body);
+      
       const userId = req.user.id;
       const updatedUser = await this.userService.updateProfile(userId, req.body);
       
@@ -78,7 +103,7 @@ class UserController {
   // Get user followers
   getFollowers = async (req, res, next) => {
     try {
-      const userId = req.params.id;
+      const userId = parseInt(req.params.id);
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 50;
 
@@ -96,7 +121,7 @@ class UserController {
   // Get user following
   getFollowing = async (req, res, next) => {
     try {
-      const userId = req.params.id;
+      const userId = parseInt(req.params.id);
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 50;
 
@@ -173,7 +198,7 @@ class UserController {
   // Get mutual follows
   getMutualFollows = async (req, res, next) => {
     try {
-      const userId = req.params.id || req.user.id;
+      const userId = parseInt(req.params.id) || req.user.id;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 50;
 

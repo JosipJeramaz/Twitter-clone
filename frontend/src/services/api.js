@@ -61,12 +61,17 @@ export const authService = {
 // User service
 export const userService = {
   getProfile: async (username) => {
-    const response = await api.get(`${API_ENDPOINTS.USERS.PROFILE}/${username}`);
+    const response = await api.get(`/users/username/${username}`);
     return response.data;
   },
 
   updateProfile: async (userData) => {
-    const response = await api.put(API_ENDPOINTS.USERS.UPDATE, userData);
+    const response = await api.put('/users/me', userData);
+    return response.data;
+  },
+
+  getCurrentUser: async () => {
+    const response = await api.get('/users/me');
     return response.data;
   }
 };
@@ -74,17 +79,37 @@ export const userService = {
 // Post service
 export const postService = {
   getAllPosts: async () => {
-    const response = await api.get(API_ENDPOINTS.POSTS.ALL);
+    const response = await api.get('/posts/timeline');
     return response.data;
   },
 
   createPost: async (content) => {
-    const response = await api.post(API_ENDPOINTS.POSTS.CREATE, { content });
+    const response = await api.post('/posts', { content });
     return response.data;
   },
 
   deletePost: async (postId) => {
-    const response = await api.delete(`${API_ENDPOINTS.POSTS.DELETE}/${postId}`);
+    const response = await api.delete(`/posts/${postId}`);
+    return response.data;
+  },
+
+  getUserPosts: async (userId) => {
+    const response = await api.get(`/posts/user/${userId}`);
+    return response.data;
+  },
+
+  getPost: async (postId) => {
+    const response = await api.get(`/posts/${postId}`);
+    return response.data;
+  },
+
+  likePost: async (postId) => {
+    const response = await api.post(`/posts/${postId}/like`);
+    return response.data;
+  },
+
+  unlikePost: async (postId) => {
+    const response = await api.delete(`/posts/${postId}/like`);
     return response.data;
   }
 };

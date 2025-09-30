@@ -44,8 +44,8 @@ const authReducer = (state, action) => {
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),
-  isAuthenticated: false,
-  loading: false,
+  isAuthenticated: !!localStorage.getItem('token'), // true if token exists
+  loading: !!localStorage.getItem('token'), // loading dok verifikujemo token
   error: null
 };
 

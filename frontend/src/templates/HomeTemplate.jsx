@@ -1,26 +1,24 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Button from '../components/UI/Button';
-import { APP_NAME, ROUTES } from '../constants';
-import './HomePage.css';
+import Button from '../components/UI/Button.jsx';
 
-const HomePage = () => {
+export const HomeTemplate = ({ appName, routes, features }) => {
   return (
     <div className="home-page">
       <div className="home-container">
         <div className="home-content">
           <div className="home-hero">
-            <h1 className="home-title">{APP_NAME}</h1>
+            <h1 className="home-title">{appName}</h1>
             <p className="home-subtitle">
-              Connect with friends and the world around you on {APP_NAME}.
+              Connect with friends and the world around you on {appName}.
             </p>
           </div>
 
           <div className="home-actions">
             <div className="action-card">
-              <h2>New to {APP_NAME}?</h2>
+              <h2>New to {appName}?</h2>
               <p>Sign up now to get your own personalized timeline!</p>
-              <Link to={ROUTES.REGISTER}>
+              <Link to={routes.REGISTER}>
                 <Button variant="primary" size="large" fullWidth>
                   Create account
                 </Button>
@@ -30,7 +28,7 @@ const HomePage = () => {
             <div className="action-card">
               <h2>Already have an account?</h2>
               <p>Sign in to see what's happening in your world.</p>
-              <Link to={ROUTES.LOGIN}>
+              <Link to={routes.LOGIN}>
                 <Button variant="secondary" size="large" fullWidth>
                   Sign in
                 </Button>
@@ -40,27 +38,15 @@ const HomePage = () => {
         </div>
 
         <div className="home-features">
-          <div className="feature">
-            <div className="feature-icon">📱</div>
-            <h3>Follow your interests</h3>
-            <p>Hear about what matters to you</p>
-          </div>
-          
-          <div className="feature">
-            <div className="feature-icon">👥</div>
-            <h3>Connect with people</h3>
-            <p>Find and follow interesting people</p>
-          </div>
-          
-          <div className="feature">
-            <div className="feature-icon">💬</div>
-            <h3>Join the conversation</h3>
-            <p>Share your thoughts with the world</p>
-          </div>
+          {features.map((feature, index) => (
+            <div key={index} className="feature">
+              <div className="feature-icon">{feature.icon}</div>
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 };
-
-export default HomePage;

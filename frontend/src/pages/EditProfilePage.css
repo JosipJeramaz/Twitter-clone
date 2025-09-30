@@ -1,0 +1,307 @@
+/* Edit Profile Page Styles */
+
+/* Modal overlay */
+.edit-profile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Modal container */
+.edit-profile-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 16px 70px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Original styles for non-modal version */
+.edit-profile {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.edit-profile-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.edit-profile-header {
+  padding: 24px 24px 0;
+  border-bottom: 1px solid #e1e8ed;
+  margin-bottom: 24px;
+}
+
+.edit-profile-header h1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #14171a;
+  margin: 0 0 8px 0;
+}
+
+.edit-profile-header p {
+  color: #657786;
+  margin: 0 0 24px 0;
+  font-size: 14px;
+}
+
+.edit-profile-error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #e74c3c;
+}
+
+/* Messages */
+.message {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin: 0 24px 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.success-message {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+/* Form Styles */
+.edit-profile-form {
+  padding: 0 24px 24px;
+}
+
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #14171a;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e1e8ed;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #14171a;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.form-group input,
+.bio-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e8ed;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #14171a;
+  background: white;
+  transition: all 0.2s;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.bio-textarea:focus {
+  outline: none;
+  border-color: #1da1f2;
+  box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
+}
+
+.bio-textarea {
+  min-height: 100px;
+  line-height: 1.4;
+}
+
+.form-hint {
+  display: block;
+  color: #657786;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #e1e8ed;
+  margin-top: 32px;
+}
+
+.form-actions button {
+  min-width: 120px;
+}
+
+/* Custom Button Overrides for this form */
+.edit-profile .form-actions button {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.edit-profile .form-actions button[type="button"] {
+  background: transparent;
+  color: #657786;
+  border-color: #e1e8ed;
+}
+
+.edit-profile .form-actions button[type="button"]:hover:not(:disabled) {
+  background: #f7f9fa;
+  color: #14171a;
+  border-color: #ccd6dd;
+}
+
+.edit-profile .form-actions button[type="submit"] {
+  background: #1da1f2;
+  color: white;
+  border-color: #1da1f2;
+}
+
+.edit-profile .form-actions button[type="submit"]:hover:not(:disabled) {
+  background: #1991db;
+  border-color: #1991db;
+}
+
+.edit-profile .form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Character Counter Styling */
+.form-group .form-hint {
+  text-align: right;
+}
+
+.form-group:has(.bio-textarea) .form-hint,
+.form-group:has(input[name="full_name"]) .form-hint,
+.form-group:has(input[name="location"]) .form-hint {
+  color: #657786;
+}
+
+/* Warning colors for near-limit character counts */
+.form-group .form-hint.warning {
+  color: #ff9800;
+  font-weight: 500;
+}
+
+.form-group .form-hint.danger {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .edit-profile {
+    padding: 10px;
+    margin: 0;
+  }
+  
+  .edit-profile-container {
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
+  .edit-profile-header,
+  .edit-profile-form {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .form-actions button {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-profile-header h1 {
+    font-size: 20px;
+  }
+  
+  .form-section h3 {
+    font-size: 16px;
+  }
+  
+  .form-group input,
+  .bio-textarea {
+    padding: 10px 12px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Loading state */
+.edit-profile .form-actions button:disabled {
+  position: relative;
+}
+
+.edit-profile .form-actions button[type="submit"]:disabled::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

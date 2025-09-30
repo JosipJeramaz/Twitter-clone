@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import Button from '../UI/Button';
-import Input from '../UI/Input';
+import { useAuth } from '../../contexts/AuthContext.jsx';
+import Button from '../UI/Button.jsx';
+import Input from '../UI/Input.jsx';
 import { ROUTES } from '../../constants';
 import './Auth.css';
 

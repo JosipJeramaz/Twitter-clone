@@ -92,7 +92,7 @@ class PostController {
   // Get user's posts
   getUserPosts = async (req, res, next) => {
     try {
-      const userId = req.params.userId || req.user.id;
+      const userId = parseInt(req.params.userId) || req.user.id;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
 
@@ -179,7 +179,7 @@ class PostController {
   // Get user's liked posts
   getUserLikedPosts = async (req, res, next) => {
     try {
-      const userId = req.params.userId || req.user.id;
+      const userId = parseInt(req.params.userId) || req.user.id;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
 

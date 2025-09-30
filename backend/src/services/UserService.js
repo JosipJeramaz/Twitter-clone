@@ -10,7 +10,7 @@ class UserService {
     this.followRepository = followRepository;
   }
 
-  // Get user profile
+  // Get user profile by ID
   async getUserProfile(userId) {
     try {
       const user = await this.userRepository.getPublicProfile(userId);
@@ -23,9 +23,38 @@ class UserService {
     }
   }
 
+  // Get user profile by username
+  async getUserProfileByUsername(username) {
+    try {
+      console.log('🔍 UserService.getUserProfileByUsername:');
+      console.log('  - Looking for username:', username);
+      
+      const user = await this.userRepository.findByUsername(username);
+      console.log('  - findByUsername result:', user);
+      
+      if (!user) {
+        console.log('❌ User not found in findByUsername');
+        throw new Error('User not found');
+      }
+      
+      console.log('  - User found, getting public profile for ID:', user.id);
+      const publicProfile = await this.userRepository.getPublicProfile(user.id);
+      console.log('  - Public profile result:', publicProfile);
+      
+      return publicProfile;
+    } catch (error) {
+      console.error('❌ UserService.getUserProfileByUsername error:', error.message);
+      throw new Error(`Failed to get user profile: ${error.message}`);
+    }
+  }
+
   // Update user profile
   async updateProfile(userId, updateData) {
     try {
+      console.log('🔧 UserService.updateProfile called');
+      console.log('  - User ID:', userId);
+      console.log('  - Update data:', updateData);
+      
       // Validate update data
       this.validateProfileUpdate(updateData);
 
