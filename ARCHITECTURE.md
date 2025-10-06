@@ -1,22 +1,132 @@
-# Twitter Clone - Clean Architecture Implementation
+# Twitter Clone - Architecture Documentation
 
-## 🏗️ Arhitektura
+## 🏗️ System Architecture
 
-Implementiran je **clean architecture** pattern sa jasno razdvojenim slojevima:
+This project implements a **clean layered architecture** with clear separation of concerns:
 
 ```
-┌─────────────────┐
-│   Controllers   │ ← HTTP zahtevi, validacija input-a
-├─────────────────┤
-│    Services     │ ← Poslovna logika, pravila aplikacije  
-├─────────────────┤
-│  Repositories   │ ← Database operacije, data access
-├─────────────────┤
-│    Database     │ ← MySQL tabele i podaci
-└─────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                         FRONTEND                             │
+│  React + MobX State Management + React Router               │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐            │
+│  │   Pages    │→ │ Templates  │→ │ Components │            │
+│  └─────┬──────┘  └────────────┘  └────────────┘            │
+│        ↓                                                      │
+│  ┌────────────┐  ┌────────────┐                             │
+│  │   Hooks    │→ │   Stores   │                             │
+│  └────────────┘  └─────┬──────┘                             │
+│                        ↓                                      │
+│                  ┌────────────┐                              │
+│                  │ API Service│                              │
+│                  └─────┬──────┘                              │
+└────────────────────────┼─────────────────────────────────────┘
+                         ↓ HTTP/REST
+┌────────────────────────┼─────────────────────────────────────┐
+│                        ↓          BACKEND                     │
+│                  ┌────────────┐                              │
+│                  │   Routes   │ (Express Router)             │
+│                  └─────┬──────┘                              │
+│                        ↓                                      │
+│                  ┌────────────┐                              │
+│                  │Controllers │ (HTTP handlers)              │
+│                  └─────┬──────┘                              │
+│                        ↓                                      │
+│                  ┌────────────┐                              │
+│                  │  Services  │ (Business logic)             │
+│                  └─────┬──────┘                              │
+│                        ↓                                      │
+│                  ┌────────────┐                              │
+│                  │Repositories│ (Data access)                │
+│                  └─────┬──────┘                              │
+└────────────────────────┼─────────────────────────────────────┘
+                         ↓ SQL
+┌────────────────────────┼─────────────────────────────────────┐
+│                        ↓         DATABASE                     │
+│                  MySQL 8.0                                    │
+│  ┌─────────┐ ┌─────────┐ ┌──────────┐ ┌────────┐           │
+│  │  users  │ │  posts  │ │ comments │ │ likes  │           │
+│  └─────────┘ └─────────┘ └──────────┘ └────────┘           │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-## 📁 Struktura backend-a
+## 📁 Frontend Structure (MobX Pattern)
+
+```
+frontend/src/
+├── stores/                    # 🔥 MobX State Management
+│   ├── RootStore.js          # Singleton container for all stores
+│   ├── AuthStore.js          # Authentication & user session
+│   ├── PostStore.js          # Posts CRUD & state
+│   ├── CommentStore.js       # Comments management
+│   ├── LikeStore.js          # Likes with optimistic updates
+│   ├── UserStore.js          # User profiles
+│   └── NotificationStore.js  # Notifications (future)
+│
+├── hooks/                     # Custom React Hooks
+│   ├── useStores.js          # Store access hooks
+│   ├── useHomeLogic.js       # Business logic for HomePage
+│   ├── useDashboardLogic.js  # Business logic for Dashboard
+│   └── useProfileLogic.js    # Business logic for Profile
+│
+├── templates/                 # Presentational Components (observer)
+│   ├── HomeTemplate.jsx
+│   ├── DashboardTemplate.jsx
+│   └── ProfileTemplate.jsx
+│
+├── pages/                     # Container Components
+│   ├── HomePage.jsx
+│   ├── DashboardPage.jsx
+│   └── ProfilePage.jsx
+│
+├── components/                # Reusable UI Components
+│   ├── Auth/                 # Authentication components
+│   ├── Layout/               # Layout components
+│   ├── Post/                 # Post-related components
+│   └── UI/                   # Generic UI components
+│
+└── services/                  # API Layer
+    └── api.js                # Axios instance & API methods
+```
+
+### MobX Store Architecture
+
+**Store Communication Pattern:**
+```javascript
+┌──────────────────────────────────────────────────┐
+│               RootStore (Singleton)              │
+│  - Holds all store instances                     │
+│  - Provides cross-store access                   │
+│  - Created once in index.js                      │
+└──────────────────┬───────────────────────────────┘
+                   │
+        ┌──────────┼──────────┬──────────┬──────────┐
+        ↓          ↓          ↓          ↓          ↓
+  ┌─────────┐ ┌────────┐ ┌─────────┐ ┌────────┐ ┌──────────┐
+  │  Auth   │ │  Post  │ │Comment  │ │  Like  │ │   User   │
+  │  Store  │ │ Store  │ │ Store   │ │ Store  │ │  Store   │
+  └─────────┘ └────────┘ └────┬────┘ └────────┘ └──────────┘
+                               │
+                               ↓
+                    Updates PostStore.posts[]
+                    (comments_count property)
+```
+
+**Example: CommentStore updates PostStore**
+```javascript
+// CommentStore.js
+async addComment(postId, content) {
+  const newComment = await api.addComment(postId, { content });
+  
+  // Update local comments
+  this.commentsByPost.set(postId, [...comments, newComment]);
+  
+  // Update PostStore via RootStore
+  this.rootStore.postStore.updatePostCommentCount(postId, 1);
+  // ↑ This triggers automatic re-render in all observer() components!
+}
+```
+
+## 📁 Backend Structure (Layered Pattern)
 
 ```
 backend/
@@ -71,23 +181,23 @@ HTTP Request → Route → Validation → Controller → Service → Repository 
 Database → Repository → Service → Controller → JSON Response
 ```
 
-### 3. Primer flow-a za kreiranje posta:
+### 3. Example Flow for Creating a Post:
 
 1. **Route**: `POST /api/posts`
 2. **Middleware**: `auth` + `createPostValidation`
 3. **Controller**: `PostController.createPost()`
-4. **Service**: `PostService.createPost()` - validira business rules
-5. **Repository**: `PostRepository.create()` - upisuje u bazu
-6. **Response**: JSON sa kreiranim postom
+4. **Service**: `PostService.createPost()` - validates business rules
+5. **Repository**: `PostRepository.create()` - writes to database
+6. **Response**: JSON with created post
 
 ## 🛡️ Error Handling
 
 ### Centralized Error Handling
 
-Sve greške se obrađuju centralno u `errorHandler.js`:
+All errors are handled centrally in `errorHandler.js`:
 
 ```javascript
-// Automatsko mapiranje grešaka na HTTP status kodove
+// Automatic error mapping to HTTP status codes
 400 - Validation errors
 401 - Authentication errors  
 403 - Permission errors
@@ -96,7 +206,7 @@ Sve greške se obrađuju centralno u `errorHandler.js`:
 500 - Internal server errors
 ```
 
-### Standardizovan Response Format
+### Standardized Response Format
 
 ```javascript
 // Success response
@@ -110,18 +220,18 @@ Sve greške se obrađuju centralno u `errorHandler.js`:
 {
   "success": false,
   "message": "Error description",
-  "errors": [ ... ] // za validation errors
+  "errors": [ ... ] // for validation errors
 }
 ```
 
 ## ✅ Input Validation
 
-Koristi se `express-validator` sa predefinisanim validation rules:
+Uses `express-validator` with predefined validation rules:
 
 ### Auth validations:
 - `registerValidation` - username, email, password format
-- `loginValidation` - email i password required  
-- `changePasswordValidation` - trenutna i nova lozinka
+- `loginValidation` - email and password required  
+- `changePasswordValidation` - current and new password
 
 ### User validations:
 - `updateProfileValidation` - profile fields format
@@ -130,13 +240,13 @@ Koristi se `express-validator` sa predefinisanim validation rules:
 
 ### Post validations:
 - `createPostValidation` - content length, image URL
-- `updatePostValidation` - isti kao create
+- `updatePostValidation` - same as create
 - `searchValidation` - search term format
 
 ## 🗄️ Repository Pattern
 
 ### BaseRepository
-Opšte CRUD operacije koje nasleđuju svi repository-ji:
+General CRUD operations inherited by all repositories:
 - `findById(id)`
 - `findAll(limit, offset)`
 - `create(data)`
@@ -144,7 +254,7 @@ Opšte CRUD operacije koje nasleđuju svi repository-ji:
 - `delete(id)`
 - `executeQuery(query, params)`
 
-### Specifični Repository-ji
+### Specific Repositories
 
 **UserRepository**:
 - `findByEmail()`, `findByUsername()`
@@ -167,48 +277,48 @@ Opšte CRUD operacije koje nasleđuju svi repository-ji:
 ## 🔧 Services Layer
 
 ### AuthService
-- Registracija i autentifikacija
-- Password hashing sa bcrypt
-- JWT token generisanje i verifikacija
-- Input validacija za auth operacije
+- Registration and authentication
+- Password hashing with bcrypt
+- JWT token generation and verification
+- Input validation for auth operations
 
 ### UserService  
-- Upravljanje korisničkim profilima
-- Follow/unfollow logika
-- Search i suggestions algoritmi
+- User profile management
+- Follow/unfollow logic
+- Search and suggestions algorithms
 - Counter updates
 
 ### PostService
-- CRUD operacije za postove
-- Feed generisanje (posts od onih koje pratiš)
-- Like/unlike logika sa counter updates
-- Search kroz sadržaj postova
+- CRUD operations for posts
+- Feed generation (posts from users you follow)
+- Like/unlike logic with counter updates
+- Search through post content
 
-## 🚀 Prednosti ove arhitekture
+## 🚀 Architecture Benefits
 
 ### ✅ **Separation of Concerns**
-Svaki sloj ima jasnu odgovornost:
+Each layer has a clear responsibility:
 - Controllers: HTTP handling
 - Services: Business logic  
 - Repositories: Data access
 
 ### ✅ **Testability**
-Lako testiranje jer su slojevi nezavisni:
+Easy testing because layers are independent:
 ```javascript
-// Mock repository u service testu
+// Mock repository in service test
 const mockUserRepo = { findById: jest.fn() };
 const userService = new UserService(mockUserRepo);
 ```
 
 ### ✅ **Maintainability**  
-- Lako dodavanje novih funkcionalnosti
-- Izmene u jednom sloju ne utiču na druge
-- Jasna struktura za nove developere
+- Easy to add new features
+- Changes in one layer don't affect others
+- Clear structure for new developers
 
 ### ✅ **Reusability**
-- BaseRepository se koristi u svim repository-jima
-- Validation rules se dele između routes
-- Service logika se može koristiti van HTTP context-a
+- BaseRepository is used in all repositories
+- Validation rules are shared between routes
+- Service logic can be used outside HTTP context
 
 ### ✅ **Error Handling**
 - Centralized error processing
@@ -252,10 +362,10 @@ GET  /api/posts/user/:userId - User posts
 GET  /api/posts/search      - Search posts
 ```
 
-## 🎯 Sledeći koraci
+## 🎯 Next Steps
 
-1. **Database setup**: Pokretanje MySQL i izvršavanje schema.sql
-2. **Environment variables**: Kreiranje .env fajla
-3. **Testing**: Dodavanje unit i integration testova
-4. **Frontend integration**: Povezivanje sa React aplikacijom
-5. **Features**: Dodavanje comments, notifications, real-time updates
+1. **Database setup**: Run MySQL and execute schema.sql
+2. **Environment variables**: Create .env file
+3. **Testing**: Add unit and integration tests
+4. **Frontend integration**: Connect with React application
+5. **Features**: Add comments, notifications, real-time updates
