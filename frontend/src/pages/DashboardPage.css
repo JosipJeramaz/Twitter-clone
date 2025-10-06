@@ -1,10 +1,11 @@
+/* Updated: 2025-10-02 - White text on black background for posts */
 .dashboard {
   max-width: 600px;
   margin: 0 auto;
 }
 
 .dashboard-header {
-  display: flex;
+    display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 0;
@@ -79,7 +80,7 @@
 }
 
 .post-textarea::placeholder {
-  color: #71767b;
+  color: #ffffff;
   font-size: 20px;
 }
 
@@ -91,12 +92,22 @@
 }
 
 .char-count {
-  color: #71767b;
+  color: #ffffff;
   font-size: 14px;
 }
 
 .char-count.warning {
   color: #f4212e;
+}
+
+/* Posts Timeline */
+.posts-timeline h2 {
+  color: #fff;
+  font-size: 20px;
+  margin: 20px 0 15px 0;
+  padding: 0 20px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
 }
 
 /* Posts Feed */
@@ -107,17 +118,19 @@
 .no-posts {
   padding: 60px 20px;
   text-align: center;
-  color: #71767b;
+  color: #fff;
+  opacity: 0.8;
 }
 
 .post {
   border-bottom: 1px solid #333;
   padding: 15px 20px;
-  transition: background-color 0.2s;
+  background-color: #000 !important;
+  color: #fff !important;
 }
 
-.post:hover {
-  background-color: rgba(255, 255, 255, 0.03);
+.post * {
+  color: #fff !important;
 }
 
 .post-header {
@@ -127,37 +140,132 @@
   margin-bottom: 8px;
 }
 
-.post-user {
+.post-author {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
 }
 
-.post-user strong {
+.author-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.post-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.post-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1da1f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
   font-weight: bold;
+  font-size: 18px;
 }
 
-.post-username {
-  color: #71767b;
+.author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.author-name {
+  color: #fff;
+  font-weight: bold;
   font-size: 15px;
 }
 
-.post-time {
-  color: #71767b;
-  font-size: 15px;
+.author-username {
+  color: #fff;
+  font-size: 14px;
+  opacity: 0.7;
 }
 
-.post-time::before {
-  content: "•";
-  margin: 0 8px;
+.post-date {
+  color: #fff;
+  font-size: 14px;
+  opacity: 0.7;
 }
 
-.delete-btn {
+.post-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.actions-left {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  opacity: 0.7;
+  font-size: 14px;
   background: none;
   border: none;
-  color: #71767b;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.action-item:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.action-item .icon {
+  font-size: 16px;
+}
+
+.like-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.like-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.like-btn.liked {
+  color: #e91e63;
+}
+
+.comment-btn.active {
+  color: #1da1f2;
+  opacity: 1;
+}
+
+.delete-post-btn {
+  background: none;
+  border: none;
+  color: #fff;
   cursor: pointer;
   padding: 4px;
   border-radius: 50%;
@@ -167,15 +275,16 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  opacity: 0.7;
 }
 
-.delete-btn:hover {
-  background-color: rgba(244, 33, 46, 0.1);
-  color: #f4212e;
+.delete-post-btn:hover {
+  background-color: rgba(244, 33, 46, 0.2);
+  opacity: 1;
 }
 
 .post-content {
-  color: #fff;
+  color: #fff !important;
   line-height: 1.4;
   margin-bottom: 12px;
   font-size: 15px;
@@ -189,9 +298,10 @@
   align-items: center;
 }
 
-.post-stats {
-  color: #71767b;
-  font-size: 13px;
+/* Comment section styling */
+.post-comments-section {
+  border-top: 1px solid #2f3336;
+  background-color: #000;
 }
 
 @media (max-width: 480px) {
@@ -208,13 +318,14 @@
     font-size: 18px;
   }
   
-  .post-user {
+  .post-author {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
   
-  .post-time::before {
-    display: none;
+  .author-link {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

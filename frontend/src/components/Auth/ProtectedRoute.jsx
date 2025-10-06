@@ -1,12 +1,13 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
+import { observer } from 'mobx-react-lite';
+import { useAuthStore } from '../../hooks/useStores';
 import './ProtectedRoute.css';
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+const ProtectedRoute = observer(({ children }) => {
+  const authStore = useAuthStore();
 
-  if (loading) {
+  if (authStore.loading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
@@ -15,11 +16,11 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!authStore.isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
   return children;
-};
+});
 
 export default ProtectedRoute;

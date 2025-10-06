@@ -95,8 +95,9 @@ class PostController {
       const userId = parseInt(req.params.userId) || req.user.id;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
+      const currentUserId = req.user?.id; // Get from auth middleware if user is authenticated
 
-      const result = await this.postService.getUserPosts(userId, page, limit);
+      const result = await this.postService.getUserPosts(userId, page, limit, currentUserId);
       
       res.status(200).json({
         success: true,
@@ -112,8 +113,9 @@ class PostController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
+      const currentUserId = req.user?.id; // Get from auth middleware if user is authenticated
 
-      const result = await this.postService.getPublicTimeline(page, limit);
+      const result = await this.postService.getPublicTimeline(page, limit, currentUserId);
       
       res.status(200).json({
         success: true,

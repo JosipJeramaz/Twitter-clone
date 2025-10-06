@@ -21,9 +21,11 @@ class BaseRepository {
 
   async findAll(limit = 50, offset = 0) {
     try {
+      const limitNum = parseInt(limit) || 50;
+      const offsetNum = parseInt(offset) || 0;
+      
       const [rows] = await this.db.execute(
-        `SELECT * FROM ${this.tableName} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-        [limit, offset]
+        `SELECT * FROM ${this.tableName} ORDER BY created_at DESC LIMIT ${limitNum} OFFSET ${offsetNum}`
       );
       return rows;
     } catch (error) {

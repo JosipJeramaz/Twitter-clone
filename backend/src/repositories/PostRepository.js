@@ -8,6 +8,13 @@ class PostRepository extends BaseRepository {
   // Get posts with user info for feed
   async getFeedPosts(userId, limit = 20, offset = 0) {
     try {
+      // Ensure parameters are numbers
+      const userIdNum = parseInt(userId);
+      const limitNum = parseInt(limit) || 20;
+      const offsetNum = parseInt(offset) || 0;
+      
+      console.log('🔍 getFeedPosts params:', { userId: userIdNum, limit: limitNum, offset: offsetNum });
+      
       const [rows] = await this.db.execute(`
         SELECT 
           p.id, p.content, p.image, p.likes_count, p.comments_count, 
@@ -19,30 +26,59 @@ class PostRepository extends BaseRepository {
         INNER JOIN follows f ON p.user_id = f.following_id
         WHERE f.follower_id = ? OR p.user_id = ?
         ORDER BY p.created_at DESC
-        LIMIT ? OFFSET ?
-      `, [userId, userId, userId, limit, offset]);
-      return rows;
+        LIMIT ${limitNum} OFFSET ${offsetNum}
+      `, [userIdNum, userIdNum, userIdNum]);
+      
+      // Convert is_liked from 0/1 to boolean
+      const postsWithBoolean = rows.map(post => ({
+        ...post,
+        is_liked: !!post.is_liked
+      }));
+      
+      console.log('✅ getFeedPosts results:', postsWithBoolean.length, 'posts');
+      return postsWithBoolean;
     } catch (error) {
+      console.error('❌ getFeedPosts error:', error);
       throw new Error(`Error getting feed posts: ${error.message}`);
     }
   }
 
   // Get user's posts
-  async getUserPosts(userId, limit = 20, offset = 0) {
+  async getUserPosts(userId, limit = 20, offset = 0, currentUserId = null) {
     try {
-      const [rows] = await this.db.execute(`
+      // Ensure parameters are numbers
+      const userIdNum = parseInt(userId);
+      const limitNum = parseInt(limit) || 20;
+      const offsetNum = parseInt(offset) || 0;
+      
+      console.log('🔍 getUserPosts params:', { userId: userIdNum, limit: limitNum, offset: offsetNum, currentUserId });
+      
+      const query = `
         SELECT 
           p.id, p.content, p.image, p.likes_count, p.comments_count, 
           p.retweets_count, p.created_at, p.updated_at,
           u.id as user_id, u.username, u.full_name, u.avatar, u.is_verified
+          ${currentUserId ? ', EXISTS(SELECT 1 FROM likes l WHERE l.post_id = p.id AND l.user_id = ?) as is_liked' : ', 0 as is_liked'}
         FROM posts p
         INNER JOIN users u ON p.user_id = u.id
         WHERE p.user_id = ?
         ORDER BY p.created_at DESC
-        LIMIT ? OFFSET ?
-      `, [userId, limit, offset]);
-      return rows;
+        LIMIT ${limitNum} OFFSET ${offsetNum}
+      `;
+      
+      const params = currentUserId ? [currentUserId, userIdNum] : [userIdNum];
+      const [rows] = await this.db.execute(query, params);
+      
+      // Convert is_liked from 0/1 to boolean
+      const postsWithBoolean = rows.map(post => ({
+        ...post,
+        is_liked: !!post.is_liked
+      }));
+      
+      console.log('✅ getUserPosts results:', postsWithBoolean.length, 'posts for user', userIdNum);
+      return postsWithBoolean;
     } catch (error) {
+      console.error('❌ getUserPosts error:', error);
       throw new Error(`Error getting user posts: ${error.message}`);
     }
   }
@@ -63,27 +99,52 @@ class PostRepository extends BaseRepository {
       
       const params = currentUserId ? [currentUserId, postId] : [postId];
       const [rows] = await this.db.execute(query, params);
-      return rows[0] || null;
+      
+      const post = rows[0] || null;
+      if (post && post.is_liked !== undefined) {
+        post.is_liked = !!post.is_liked;
+      }
+      
+      return post;
     } catch (error) {
       throw new Error(`Error getting post with user: ${error.message}`);
     }
   }
 
   // Get public timeline (all posts)
-  async getPublicTimeline(limit = 20, offset = 0) {
+  async getPublicTimeline(limit = 20, offset = 0, currentUserId = null) {
     try {
-      const [rows] = await this.db.execute(`
+      // Ensure parameters are numbers
+      const limitNum = parseInt(limit) || 20;
+      const offsetNum = parseInt(offset) || 0;
+      
+      console.log('🔍 getPublicTimeline params:', { limit: limitNum, offset: offsetNum, currentUserId });
+      
+      const query = `
         SELECT 
           p.id, p.content, p.image, p.likes_count, p.comments_count, 
           p.retweets_count, p.created_at, p.updated_at,
           u.id as user_id, u.username, u.full_name, u.avatar, u.is_verified
+          ${currentUserId ? ', EXISTS(SELECT 1 FROM likes l WHERE l.post_id = p.id AND l.user_id = ?) as is_liked' : ', 0 as is_liked'}
         FROM posts p
         INNER JOIN users u ON p.user_id = u.id
         ORDER BY p.created_at DESC
-        LIMIT ? OFFSET ?
-      `, [limit, offset]);
-      return rows;
+        LIMIT ${limitNum} OFFSET ${offsetNum}
+      `;
+      
+      const params = currentUserId ? [currentUserId] : [];
+      const [rows] = await this.db.execute(query, params);
+      
+      // Convert is_liked from 0/1 to boolean
+      const postsWithBoolean = rows.map(post => ({
+        ...post,
+        is_liked: !!post.is_liked
+      }));
+      
+      console.log('✅ getPublicTimeline results:', postsWithBoolean.length, 'posts');
+      return postsWithBoolean;
     } catch (error) {
+      console.error('❌ getPublicTimeline error:', error);
       throw new Error(`Error getting public timeline: ${error.message}`);
     }
   }

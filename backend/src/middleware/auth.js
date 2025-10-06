@@ -44,4 +44,33 @@ const auth = (req, res, next) => {
   }
 };
 
+// Optional auth middleware - doesn't fail if no token is provided
+const optionalAuth = (req, res, next) => {
+  try {
+    const authHeader = req.header('Authorization') || req.headers.authorization;
+    
+    if (!authHeader) {
+      // No token provided, continue without user info
+      req.user = null;
+      return next();
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    
+    if (!token) {
+      req.user = null;
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: decoded.userId }; // ✅ Match the format from auth middleware
+    next();
+  } catch (error) {
+    // If token is invalid, continue without user info instead of failing
+    req.user = null;
+    next();
+  }
+};
+
 module.exports = auth;
+module.exports.optionalAuth = optionalAuth;

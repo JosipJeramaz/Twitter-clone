@@ -9,12 +9,12 @@ import './ProfilePage.css';
 const ProfilePage = () => {
   const {
     profile,
-    posts,
     loading,
     error,
     username,
     isOwnProfile,
-    handleDeletePost
+    handleDeletePost,
+    handleLikePost
   } = useProfileLogic();
 
   return (
@@ -22,10 +22,10 @@ const ProfilePage = () => {
       loading={loading}
       error={error}
       profile={profile}
-      posts={posts}
       username={username}
       isOwnProfile={isOwnProfile}
       onDeletePost={handleDeletePost}
+      onLikePost={handleLikePost}
     />
   );
 };

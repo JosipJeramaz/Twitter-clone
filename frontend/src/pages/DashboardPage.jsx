@@ -8,26 +8,26 @@ import './DashboardPage.css';
  */
 const DashboardPage = () => {
   const {
-    posts,
     newPost,
     loading,
     posting,
     user,
     handlePostChange,
     handleCreatePost,
-    handleDeletePost
+    handleDeletePost,
+    handleLikePost
   } = useDashboardLogic();
 
   return (
     <DashboardTemplate
       user={user}
       loading={loading}
-      posts={posts}
       newPost={newPost}
       posting={posting}
       onPostChange={handlePostChange}
       onCreatePost={handleCreatePost}
       onDeletePost={handleDeletePost}
+      onLikePost={handleLikePost}
     />
   );
 };

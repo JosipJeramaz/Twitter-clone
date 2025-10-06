@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
+import { observer } from 'mobx-react-lite';
+import { useAuthStore } from '../../hooks/useStores';
 import Button from '../UI/Button.jsx';
 import Input from '../UI/Input.jsx';
 import { ROUTES } from '../../constants';
 import './Auth.css';
 
-const Register = () => {
+const Register = observer(() => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -15,15 +16,15 @@ const Register = () => {
     full_name: ''
   });
   const [validationError, setValidationError] = useState('');
-  const { register, loading, error, clearError, isAuthenticated } = useAuth();
+  const authStore = useAuthStore();
   const navigate = useNavigate();
 
   // Redirect if already logged in
   useEffect(() => {
-    if (isAuthenticated) {
+    if (authStore.isAuthenticated) {
       navigate(ROUTES.DASHBOARD);
     }
-  }, [isAuthenticated, navigate]);
+  }, [authStore.isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,7 +32,7 @@ const Register = () => {
       ...prev,
       [name]: value
     }));
-    if (error) clearError();
+    if (authStore.error) authStore.clearError();
     if (validationError) setValidationError('');
   };
 
@@ -58,10 +59,10 @@ const Register = () => {
 
     try {
       const { confirmPassword, ...userData } = formData;
-      await register(userData);
+      await authStore.register(userData);
       navigate(ROUTES.DASHBOARD);
     } catch (err) {
-      // Error is handled in AuthContext
+      // Error is handled in AuthStore
     }
   };
 
@@ -70,9 +71,9 @@ const Register = () => {
       <div className="auth-form">
         <h2>Join Twitter Clone today</h2>
         
-        {(error || validationError) && (
+        {(authStore.error || validationError) && (
           <div className="error-message">
-            {error || validationError}
+            {authStore.error || validationError}
           </div>
         )}
 
@@ -126,7 +127,7 @@ const Register = () => {
             type="submit" 
             variant="primary" 
             fullWidth 
-            loading={loading}
+            loading={authStore.loading}
           >
             Create account
           </Button>
@@ -143,6 +144,6 @@ const Register = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Register;

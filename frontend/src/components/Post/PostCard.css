@@ -1,0 +1,82 @@
+.post-card {
+  background: white;
+  border: 1px solid var(--border-color, #e1e8ed);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color, #e1e8ed);
+}
+
+.post-header strong {
+  font-weight: 700;
+  color: var(--text-primary, #14171a);
+}
+
+.post-date {
+  color: var(--text-secondary, #657786);
+  font-size: 0.85rem;
+}
+
+.post-content {
+  padding: 1rem;
+}
+
+.post-content p {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--text-primary, #14171a);
+}
+
+.post-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-color, #e1e8ed);
+}
+
+.post-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: var(--text-secondary, #657786);
+}
+
+.post-actions button:hover {
+  background-color: var(--bg-hover, #f7f9fa);
+}
+
+.like-button.liked {
+  color: #e0245e;
+}
+
+.comment-button.active {
+  color: var(--primary-color, #1da1f2);
+  background-color: var(--bg-hover, #f7f9fa);
+}
+
+.delete-button {
+  margin-left: auto;
+  color: #e0245e;
+}
+
+.delete-button:hover {
+  background-color: rgba(224, 36, 94, 0.1);
+}
+
+.post-comments-section {
+  border-top: 1px solid var(--border-color, #e1e8ed);
+}

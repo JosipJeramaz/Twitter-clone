@@ -1,18 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { observer } from 'mobx-react-lite';
+import { useLikeStore, usePostStore } from '../hooks/useStores';
 import Button from '../components/UI/Button.jsx';
+import CommentList from '../components/Post/CommentList.jsx';
+import CommentForm from '../components/Post/CommentForm.jsx';
 
-export const DashboardTemplate = ({
+export const DashboardTemplate = observer(({
   user,
   loading,
-  posts,
   newPost,
   posting,
   onPostChange,
   onCreatePost,
-  onDeletePost
+  onDeletePost,
+  onLikePost
 }) => {
-  if (loading) {
+  const likeStore = useLikeStore();
+  const postStore = usePostStore(); // Get postStore directly in template
+  const [openComments, setOpenComments] = useState({});
+  
+  const posts = postStore.posts; // Use observable directly
+  
+  const toggleComments = (postId) => {
+    setOpenComments(prev => ({
+      ...prev,
+      [postId]: !prev[postId]
+    }));
+  };
+  
+  // Debug logging
+  console.log('🔍 DashboardTemplate Debug:');
+  console.log('  - user:', user);
+  console.log('  - loading:', loading);
+  console.log('  - posts:', posts);
+  if (loading || !user) {
     return (
       <div className="dashboard-loading">
         <div className="loading-spinner"></div>
@@ -24,10 +46,12 @@ export const DashboardTemplate = ({
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <h1>Welcome back, {user?.full_name || user?.username}!</h1>
-        <Link to={`/profile/${user?.username}`} className="profile-link">
-          View My Profile
-        </Link>
+        <h1>Welcome back, {user?.full_name || user?.username || 'User'}!</h1>
+        {user?.username && (
+          <Link to={`/profile/${user.username}`} className="profile-link">
+            View My Profile
+          </Link>
+        )}
       </div>
 
       {/* Create Post Form */}
@@ -36,16 +60,17 @@ export const DashboardTemplate = ({
           <textarea
             value={newPost}
             onChange={onPostChange}
-            placeholder="What's happening?"
+            placeholder={user ? "What's happening?" : "Loading..."}
             className="post-textarea"
             maxLength={280}
+            disabled={!user}
           />
           <div className="post-actions">
             <span className="char-count">{newPost.length}/280</span>
             <Button 
               type="submit" 
               variant="primary" 
-              disabled={!newPost.trim() || posting}
+              disabled={!user || !newPost.trim() || posting}
               loading={posting}
             >
               {posting ? 'Posting...' : 'Tweet'}
@@ -93,14 +118,24 @@ export const DashboardTemplate = ({
                 </div>
 
                 <div className="post-actions">
-                  <span className="action-item">
-                    <span className="icon">💬</span>
-                    {post.comments_count || 0}
-                  </span>
-                  <span className="action-item">
-                    <span className="icon">❤️</span>
-                    {post.likes_count || 0}
-                  </span>
+                  <div className="actions-left">
+                    <button 
+                      className={`action-item comment-btn ${openComments[post.id] ? 'active' : ''}`}
+                      onClick={() => toggleComments(post.id)}
+                      title="Comments"
+                    >
+                      <span className="icon">💬</span>
+                      {post.comments_count || 0}
+                    </button>
+                    <button 
+                      className={`action-item like-btn ${likeStore.isLiked(post.id) ? 'liked' : ''}`}
+                      onClick={() => onLikePost(post.id)}
+                      title={likeStore.isLiked(post.id) ? 'Unlike post' : 'Like post'}
+                    >
+                      <span className="icon">{likeStore.isLiked(post.id) ? '❤️' : '🤍'}</span>
+                      {likeStore.getLikesCount(post.id)}
+                    </button>
+                  </div>
                   {post.user_id === user?.id && (
                     <button 
                       onClick={() => onDeletePost(post.id)}
@@ -111,6 +146,14 @@ export const DashboardTemplate = ({
                     </button>
                   )}
                 </div>
+
+                {/* Comments Section */}
+                {openComments[post.id] && (
+                  <div className="post-comments-section">
+                    <CommentList postId={post.id} />
+                    <CommentForm postId={post.id} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -118,4 +161,4 @@ export const DashboardTemplate = ({
       </div>
     </div>
   );
-};
+});

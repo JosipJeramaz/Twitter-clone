@@ -114,4 +114,24 @@ export const postService = {
   }
 };
 
+// Comment service
+export const commentService = {
+  getComments: async (postId, page = 1, limit = 50) => {
+    const response = await api.get(`/posts/${postId}/comments`, {
+      params: { page, limit }
+    });
+    return response.data;
+  },
+
+  addComment: async (postId, content) => {
+    const response = await api.post(`/posts/${postId}/comments`, { content });
+    return response.data;
+  },
+
+  deleteComment: async (postId, commentId) => {
+    const response = await api.delete(`/posts/${postId}/comments/${commentId}`);
+    return response.data;
+  }
+};
+
 export default api;

@@ -17,6 +17,8 @@ class PostService {
   // Create new post
   async createPost(userId, postData) {
     try {
+      console.log('🔍 Creating post for user:', userId, 'with data:', postData);
+      
       // Validate post data
       this.validatePostData(postData);
 
@@ -25,6 +27,7 @@ class PostService {
       if (!user) {
         throw new Error('User not found');
       }
+      console.log('✅ User found:', user.username);
 
       // Create post
       const newPost = await this.postRepository.create({
@@ -32,14 +35,17 @@ class PostService {
         content: postData.content.trim(),
         image: postData.image || null
       });
+      console.log('✅ Post created with ID:', newPost.id);
 
       // Update user's post count
       await this.userRepository.updateCounters(userId);
 
       // Get post with user info
       const postWithUser = await this.postRepository.getPostWithUser(newPost.id);
+      console.log('✅ Post with user info retrieved:', postWithUser.id);
       return postWithUser;
     } catch (error) {
+      console.error('❌ Error creating post:', error);
       throw new Error(`Failed to create post: ${error.message}`);
     }
   }
@@ -132,7 +138,7 @@ class PostService {
   }
 
   // Get user's posts
-  async getUserPosts(userId, page = 1, limit = 20) {
+  async getUserPosts(userId, page = 1, limit = 20, currentUserId = null) {
     try {
       // Check if user exists
       const user = await this.userRepository.findById(userId);
@@ -141,7 +147,7 @@ class PostService {
       }
 
       const offset = (page - 1) * limit;
-      const posts = await this.postRepository.getUserPosts(userId, limit, offset);
+      const posts = await this.postRepository.getUserPosts(userId, limit, offset, currentUserId);
       
       return {
         posts,
@@ -155,10 +161,10 @@ class PostService {
   }
 
   // Get public timeline
-  async getPublicTimeline(page = 1, limit = 20) {
+  async getPublicTimeline(page = 1, limit = 20, currentUserId = null) {
     try {
       const offset = (page - 1) * limit;
-      const posts = await this.postRepository.getPublicTimeline(limit, offset);
+      const posts = await this.postRepository.getPublicTimeline(limit, offset, currentUserId);
       
       return {
         posts,

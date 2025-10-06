@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { useAuthStore } from './useStores';
 import { userService } from '../services/api';
 
 /**
  * Custom hook for managing Edit Profile logic
  */
 export const useEditProfileLogic = (onClose = null) => {
-  const { user } = useAuth();
+  const authStore = useAuthStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,15 +21,15 @@ export const useEditProfileLogic = (onClose = null) => {
 
   // Initialize form with user data
   useEffect(() => {
-    if (user) {
+    if (authStore.user) {
       setFormData({
-        full_name: user.full_name || '',
-        bio: user.bio || '',
-        location: user.location || '',
-        website: user.website || ''
+        full_name: authStore.user.full_name || '',
+        bio: authStore.user.bio || '',
+        location: authStore.user.location || '',
+        website: authStore.user.website || ''
       });
     }
-  }, [user]);
+  }, [authStore.user]);
 
   /**
    * Handle input changes
@@ -113,15 +113,15 @@ export const useEditProfileLogic = (onClose = null) => {
       // Show success message
       if (response.data?.user || response.user) {
         setSuccess('Profile updated successfully!');
-        console.log('🎉 Profile updated, navigating to:', `/profile/${user.username}`);
-        console.log('📝 User object:', user);
+        console.log('🎉 Profile updated, navigating to:', `/profile/${authStore.user.username}`);
+        console.log('📝 User object:', authStore.user);
         console.log('📝 onClose callback:', onClose);
         
         // Navigate immediately
         if (onClose) {
           onClose(); // Close modal if callback is provided
         } else {
-          navigate(`/profile/${user.username}`); // Otherwise navigate to profile
+          navigate(`/profile/${authStore.user.username}`); // Otherwise navigate to profile
         }
       }
     } catch (error) {
@@ -139,7 +139,7 @@ export const useEditProfileLogic = (onClose = null) => {
     if (onClose) {
       onClose(); // Close modal if callback is provided
     } else {
-      navigate(`/profile/${user?.username}`); // Otherwise navigate to profile
+      navigate(`/profile/${authStore.user?.username}`); // Otherwise navigate to profile
     }
   };
 
@@ -147,12 +147,12 @@ export const useEditProfileLogic = (onClose = null) => {
    * Reset form to original values
    */
   const resetForm = () => {
-    if (user) {
+    if (authStore.user) {
       setFormData({
-        full_name: user.full_name || '',
-        bio: user.bio || '',
-        location: user.location || '',
-        website: user.website || ''
+        full_name: authStore.user.full_name || '',
+        bio: authStore.user.bio || '',
+        location: authStore.user.location || '',
+        website: authStore.user.website || ''
       });
     }
     setError('');
@@ -161,7 +161,7 @@ export const useEditProfileLogic = (onClose = null) => {
 
   return {
     // State
-    user,
+    user: authStore.user,
     formData,
     loading,
     error,

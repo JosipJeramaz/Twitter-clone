@@ -1,16 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
+import { observer } from 'mobx-react-lite';
+import { useAuthStore } from '../../hooks/useStores';
 import { APP_NAME, ROUTES } from '../../constants';
 import './Header.css';
 
-const Header = () => {
-  const { user, logout } = useAuth();
+const Header = observer(() => {
+  const authStore = useAuthStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      logout();
+      authStore.logout();
       navigate(ROUTES.HOME);
     }
   };
@@ -23,9 +24,9 @@ const Header = () => {
         </div>
         
         <div className="header-right">
-          {user && (
+          {authStore.user && (
             <div className="user-menu">
-              <span className="username">@{user.username}</span>
+              <span className="username">@{authStore.user.username}</span>
               <button onClick={handleLogout} className="logout-btn">
                 Logout
               </button>
@@ -35,6 +36,6 @@ const Header = () => {
       </div>
     </header>
   );
-};
+});
 
 export default Header;

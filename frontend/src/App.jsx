@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext.jsx';
+import { useRootStore } from './hooks/useStores';
 import ProtectedRoute from './components/Auth/ProtectedRoute.jsx';
 import Layout from './components/Layout/Layout.jsx';
 import HomePage from './pages/HomePage.jsx';
@@ -12,9 +12,17 @@ import EditProfilePage from './pages/EditProfilePage.jsx';
 import './App.css';
 
 function App() {
+  const rootStore = useRootStore();
+  
+  useEffect(() => {
+    // Inicijaliziraj auth state iz localStorage
+    if (rootStore.authStore.token) {
+      rootStore.authStore.verifyToken();
+    }
+  }, []);
+
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
         <div className="App">
           <Routes>
             {/* Public routes */}
@@ -52,7 +60,6 @@ function App() {
           </Routes>
         </div>
       </Router>
-    </AuthProvider>
   );
 }
 

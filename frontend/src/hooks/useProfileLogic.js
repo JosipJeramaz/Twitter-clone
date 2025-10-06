@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { useAuthStore, usePostStore, useLikeStore } from './useStores';
 import { userService, postService } from '../services/api';
 
 /**
@@ -8,9 +8,10 @@ import { userService, postService } from '../services/api';
  */
 export const useProfileLogic = () => {
   const { username } = useParams();
-  const { user: currentUser } = useAuth();
+  const authStore = useAuthStore();
+  const postStore = usePostStore();
+  const likeStore = useLikeStore();
   const [profile, setProfile] = useState(null);
-  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
@@ -18,8 +19,8 @@ export const useProfileLogic = () => {
   // Debug logs
   console.log('🔍 useProfileLogic Debug:');
   console.log('  - URL username:', username);
-  console.log('  - Current user:', currentUser);
-  console.log('  - Current user username:', currentUser?.username);
+  console.log('  - Current user:', authStore.user);
+  console.log('  - Current user username:', authStore.user?.username);
 
   // Fetch profile when username changes
   useEffect(() => {
@@ -37,8 +38,8 @@ export const useProfileLogic = () => {
 
   // Check if it's own profile
   useEffect(() => {
-    setIsOwnProfile(currentUser?.username === username);
-  }, [currentUser, username]);
+    setIsOwnProfile(authStore.user?.username === username);
+  }, [authStore.user, username]);
 
   /**
    * Fetch user profile
@@ -68,12 +69,20 @@ export const useProfileLogic = () => {
   const fetchUserPosts = async () => {
     try {
       if (profile && profile.id) {
+        console.log('🔍 Fetching posts for user ID:', profile.id);
         const data = await postService.getUserPosts(profile.id);
-        setPosts(data.posts || []);
+        console.log('✅ Posts response:', data);
+        
+        const fetchedPosts = data.data.posts || [];
+        
+        // Update PostStore (MobX will auto-update observers)
+        postStore.setPosts(fetchedPosts);
+        
+        // Sync likes to LikeStore
+        likeStore.syncLikesFromPosts(fetchedPosts);
       }
     } catch (error) {
-      console.error('Error fetching user posts:', error);
-      setPosts([]);
+      console.error('❌ Error fetching user posts:', error);
     } finally {
       setLoading(false);
     }
@@ -89,10 +98,49 @@ export const useProfileLogic = () => {
 
     try {
       await postService.deletePost(postId);
-      setPosts(currentPosts => currentPosts.filter(post => post.id !== postId));
+      postStore.removePost(postId);
     } catch (error) {
       console.error('Error deleting post:', error);
       alert('Failed to delete post. Please try again.');
+    }
+  };
+
+  /**
+   * Like/unlike post
+   */
+  const handleLikePost = async (postId) => {
+    try {
+      // Get current like status from LikeStore
+      const wasLiked = likeStore.isLiked(postId);
+      const currentLikesCount = likeStore.getLikesCount(postId);
+
+      // Optimistically update LikeStore
+      const newIsLiked = likeStore.toggleLike(postId);
+      const newLikesCount = likeStore.getLikesCount(postId);
+
+      // Update PostStore (MobX will auto-update observers)
+      postStore.updatePostLike(postId, newIsLiked, newLikesCount);
+
+      // Make API call
+      if (wasLiked) {
+        await postService.unlikePost(postId);
+        console.log(`✅ Successfully unliked post ${postId}`);
+      } else {
+        await postService.likePost(postId);
+        console.log(`✅ Successfully liked post ${postId}`);
+      }
+    } catch (error) {
+      console.error('❌ Error toggling like:', error);
+      console.error('Error details:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      
+      // Revert optimistic update on error
+      likeStore.setPostLikeData(postId, wasLiked, currentLikesCount);
+      postStore.updatePostLike(postId, wasLiked, currentLikesCount);
+      
+      // Show more specific error message
+      const errorMessage = error.response?.data?.message || error.message || 'Unknown error';
+      alert(`Failed to update like: ${errorMessage}`);
     }
   };
 
@@ -117,15 +165,16 @@ export const useProfileLogic = () => {
   return {
     // State
     profile,
-    posts,
+    posts: postStore.posts, // Use MobX observable directly
     loading,
     error,
     username,
     isOwnProfile,
-    currentUser,
+    currentUser: authStore.user,
     
     // Actions
     handleDeletePost,
+    handleLikePost,
     refreshProfile,
     refreshPosts,
     

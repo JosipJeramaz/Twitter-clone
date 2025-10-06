@@ -1,20 +1,21 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext.jsx';
+import { observer } from 'mobx-react-lite';
+import { useAuthStore } from '../../hooks/useStores';
 import { ROUTES } from '../../constants';
 import './Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = observer(() => {
   const location = useLocation();
-  const { user } = useAuth();
+  const authStore = useAuthStore();
 
   const menuItems = [
     { path: ROUTES.DASHBOARD, label: 'Home', icon: '🏠' },
     { 
-      path: user?.username ? `/profile/${user.username}` : '/profile', 
+      path: authStore.user?.username ? `/profile/${authStore.user.username}` : '/profile', 
       label: 'Profile', 
       icon: '👤',
-      disabled: !user?.username
+      disabled: !authStore.user?.username
     },
     { path: '/notifications', label: 'Notifications', icon: '🔔' },
     { path: '/messages', label: 'Messages', icon: '💬' },
@@ -47,6 +48,6 @@ const Sidebar = () => {
       </nav>
     </aside>
   );
-};
+});
 
 export default Sidebar;

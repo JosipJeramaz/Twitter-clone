@@ -7,6 +7,7 @@ const {
   LikeRepository, 
   FollowRepository 
 } = require('../repositories');
+const CommentRepository = require('../repositories/CommentRepository');
 
 // Import services
 const { 
@@ -14,11 +15,13 @@ const {
   UserService, 
   PostService 
 } = require('../services');
+const CommentService = require('../services/CommentService');
 
 // Import controllers
 const AuthController = require('../controllers/AuthController');
 const UserController = require('../controllers/UserController');
 const PostController = require('../controllers/PostController');
+const CommentController = require('../controllers/CommentController');
 
 /**
  * Configure and register all dependencies
@@ -32,6 +35,7 @@ function configureDependencies() {
   container.registerSingleton('postRepository', () => new PostRepository());
   container.registerSingleton('likeRepository', () => new LikeRepository());
   container.registerSingleton('followRepository', () => new FollowRepository());
+  container.registerSingleton('commentRepository', () => new CommentRepository());
 
   // Register services as singletons with their dependencies
   container.registerSingleton('authService', (container) => 
@@ -55,6 +59,13 @@ function configureDependencies() {
     )
   );
 
+  container.registerSingleton('commentService', (container) => 
+    new CommentService(
+      container.resolve('commentRepository'),
+      container.resolve('postRepository')
+    )
+  );
+
   // Register controllers as singletons with their dependencies
   container.registerSingleton('authController', (container) => 
     new AuthController(container.resolve('authService'))
@@ -66,6 +77,10 @@ function configureDependencies() {
 
   container.registerSingleton('postController', (container) => 
     new PostController(container.resolve('postService'))
+  );
+
+  container.registerSingleton('commentController', (container) => 
+    new CommentController(container.resolve('commentService'))
   );
 
   return container;
