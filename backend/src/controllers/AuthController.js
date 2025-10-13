@@ -100,6 +100,44 @@ class AuthController {
       message: 'Logout successful'
     });
   };
+
+  // Google OAuth callback handler
+  googleCallback = async (req, res, next) => {
+    try {
+      const oauthProfile = req.user; // Set by Passport strategy
+      
+      if (!oauthProfile) {
+        return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
+      }
+
+      const result = await this.authService.handleOAuthLogin(oauthProfile);
+      
+      // Redirect to frontend with token
+      res.redirect(`${process.env.FRONTEND_URL}/oauth/callback?token=${result.token}`);
+    } catch (error) {
+      console.error('Google OAuth error:', error);
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
+    }
+  };
+
+  // Apple OAuth callback handler
+  appleCallback = async (req, res, next) => {
+    try {
+      const oauthProfile = req.user; // Set by Passport strategy
+      
+      if (!oauthProfile) {
+        return res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
+      }
+
+      const result = await this.authService.handleOAuthLogin(oauthProfile);
+      
+      // Redirect to frontend with token
+      res.redirect(`${process.env.FRONTEND_URL}/oauth/callback?token=${result.token}`);
+    } catch (error) {
+      console.error('Apple OAuth error:', error);
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
+    }
+  };
 }
 
 module.exports = AuthController;

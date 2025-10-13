@@ -6,8 +6,16 @@ A full-stack Twitter clone built with React, Node.js, Express, MySQL, and MobX f
 
 ### Implemented ✅
 - ✅ User registration and authentication (JWT)
+- ✅ OAuth authentication (Google & Apple Sign In)
 - ✅ User profiles with custom usernames
-- ✅ Post creation, viewing, and deletion
+- ✅ Post creation, v5. **Install and run backend**
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+
+6. **Install and run frontend**and deletion
 - ✅ Like/Unlike posts with optimistic updates
 - ✅ Comments system (add, view, delete)
 - ✅ Real-time UI updates using MobX
@@ -18,7 +26,6 @@ A full-stack Twitter clone built with React, Node.js, Express, MySQL, and MobX f
 - [ ] Follow/unfollow system
 - [ ] Real-time notifications
 - [ ] Image uploads for posts and profiles
-- [ ] OAuth (Google/Apple)
 - [ ] Advanced search and filtering
 - [ ] Hashtags and mentions
 - [ ] Direct messaging
@@ -295,18 +302,30 @@ MySQL Database
 
 2. **Set up environment variables**
    ```bash
+   # Backend
+   cd backend
    cp .env.example .env
    # Edit .env with your database credentials
+   
+   # Frontend
+   cd ../frontend
+   cp .env.example .env
+   # Edit .env with your API URL
    ```
 
-3. **Set up the database**
+3. **Configure OAuth (Optional)**
+   - See [OAUTH_SETUP.md](./OAUTH_SETUP.md) for detailed OAuth configuration
+   - Required for Google and Apple Sign In features
+
+4. **Set up the database**
    ```bash
    # Create database and run schema
    mysql -u root -p < database/schema.sql
    mysql -u root -p < database/seed.sql
+   mysql -u root -p < database/add_oauth_support.sql
    ```
 
-4. **Install and run backend**
+5. **Install and run backend**
    ```bash
    cd backend
    npm install
@@ -342,6 +361,10 @@ This will start all services (MySQL, Backend, Frontend) automatically.
 - `POST /api/auth/login` - Login user
   - Body: `{ email, password }`
   - Returns: JWT token + user data
+- `GET /api/auth/google` - Initiate Google OAuth login
+- `GET /api/auth/google/callback` - Google OAuth callback
+- `GET /api/auth/apple` - Initiate Apple OAuth login
+- `POST /api/auth/apple/callback` - Apple OAuth callback
 - `POST /api/auth/logout` - Logout user (clears token)
 
 ### User Endpoints

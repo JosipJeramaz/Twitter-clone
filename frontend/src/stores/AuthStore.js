@@ -96,6 +96,38 @@ class AuthStore {
     this.error = null;
   }
 
+  // Handle OAuth callback
+  async handleOAuthCallback(token) {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      // Store token
+      localStorage.setItem('token', token);
+      
+      // Verify token and get user data
+      const user = await authService.verifyToken();
+      
+      runInAction(() => {
+        this.user = user;
+        this.token = token;
+        this.isAuthenticated = true;
+        this.loading = false;
+      });
+      
+      return user;
+    } catch (error) {
+      runInAction(() => {
+        localStorage.removeItem('token');
+        this.token = null;
+        this.isAuthenticated = false;
+        this.error = error.response?.data?.message || 'OAuth authentication failed';
+        this.loading = false;
+      });
+      throw error;
+    }
+  }
+
   // Clear error
   clearError() {
     this.error = null;

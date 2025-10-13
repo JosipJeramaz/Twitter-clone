@@ -119,11 +119,11 @@ export const useDashboardLogic = () => {
    * Like/unlike post
    */
   const handleLikePost = async (postId) => {
+    // Get current like status BEFORE try block so it's accessible in catch
+    const wasLiked = likeStore.isLiked(postId);
+    const currentLikesCount = likeStore.getLikesCount(postId);
+    
     try {
-      // Get current like status from LikeStore
-      const wasLiked = likeStore.isLiked(postId);
-      const currentLikesCount = likeStore.getLikesCount(postId);
-
       // Optimistically update LikeStore
       const newIsLiked = likeStore.toggleLike(postId);
       const newLikesCount = likeStore.getLikesCount(postId);

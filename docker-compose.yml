@@ -17,6 +17,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+      - ./database/add_oauth_support.sql:/docker-entrypoint-initdb.d/3-add_oauth_support.sql
     networks:
       - twitter_network
 

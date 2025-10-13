@@ -111,6 +111,62 @@ class UserRepository extends BaseRepository {
       throw new Error(`Error getting user profile: ${error.message}`);
     }
   }
+
+  // Find user by OAuth provider ID
+  async findByOAuthId(provider, providerId) {
+    try {
+      const columnName = provider === 'google' ? 'google_id' : 'apple_id';
+      const [rows] = await this.db.execute(
+        `SELECT * FROM users WHERE ${columnName} = ?`,
+        [providerId]
+      );
+      return rows[0] || null;
+    } catch (error) {
+      throw new Error(`Error finding user by OAuth ID: ${error.message}`);
+    }
+  }
+
+  // Create or update OAuth user
+  async findOrCreateOAuthUser(oauthProfile) {
+    const { provider, providerId, email, fullName, firstName, lastName, picture } = oauthProfile;
+    
+    try {
+      // First, try to find user by OAuth ID
+      let user = await this.findByOAuthId(provider, providerId);
+      
+      if (user) {
+        // Update last login
+        return user;
+      }
+
+      // Check if user exists with same email
+      user = await this.findByEmail(email);
+      
+      if (user) {
+        // Link OAuth account to existing user
+        const columnName = provider === 'google' ? 'google_id' : 'apple_id';
+        await this.db.execute(
+          `UPDATE users SET ${columnName} = ?, oauth_provider = ?, profile_picture = ? WHERE id = ?`,
+          [providerId, provider, picture || user.avatar, user.id]
+        );
+        return await this.findById(user.id);
+      }
+
+      // Create new user
+      const username = email.split('@')[0] + '_' + Math.random().toString(36).substr(2, 5);
+      const columnName = provider === 'google' ? 'google_id' : 'apple_id';
+      
+      const [result] = await this.db.execute(
+        `INSERT INTO users (username, email, full_name, ${columnName}, oauth_provider, profile_picture, is_verified) 
+         VALUES (?, ?, ?, ?, ?, ?, 1)`,
+        [username, email, fullName, providerId, provider, picture || null]
+      );
+
+      return await this.findById(result.insertId);
+    } catch (error) {
+      throw new Error(`Error creating OAuth user: ${error.message}`);
+    }
+  }
 }
 
 module.exports = UserRepository;

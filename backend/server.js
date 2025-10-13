@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const { configureDependencies } = require('./src/config/dependencies');
+const { initializePassport, passport } = require('./src/config/passport');
 const createAuthRoutes = require('./src/routes/auth');
 const createUserRoutes = require('./src/routes/users');
 const createPostRoutes = require('./src/routes/posts');
@@ -13,8 +14,15 @@ const { errorHandler, notFoundHandler } = require('./src/middleware/errorHandler
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy (required for rate limiting behind proxies)
+app.set('trust proxy', 1);
+
 // Configure dependency injection
 const container = configureDependencies();
+
+// Initialize Passport for OAuth
+initializePassport();
+app.use(passport.initialize());
 
 // Security middleware
 app.use(helmet());

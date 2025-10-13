@@ -186,6 +186,27 @@ class AuthService {
       throw new Error('Password must contain at least one letter and one number');
     }
   }
+
+  // Handle OAuth login (Google/Apple)
+  async handleOAuthLogin(oauthProfile) {
+    try {
+      // Find or create user with OAuth profile
+      const user = await this.userRepository.findOrCreateOAuthUser(oauthProfile);
+
+      // Generate JWT token
+      const token = this.generateToken(user.id);
+
+      // Return user without password
+      const { password_hash, ...userWithoutPassword } = user;
+
+      return {
+        user: userWithoutPassword,
+        token
+      };
+    } catch (error) {
+      throw new Error(`OAuth login failed: ${error.message}`);
+    }
+  }
 }
 
 module.exports = AuthService;
