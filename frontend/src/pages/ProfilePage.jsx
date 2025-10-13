@@ -13,8 +13,11 @@ const ProfilePage = () => {
     error,
     username,
     isOwnProfile,
+    isFollowing,
     handleDeletePost,
-    handleLikePost
+    handleLikePost,
+    handleFollowUser,
+    handleUnfollowUser
   } = useProfileLogic();
 
   return (
@@ -24,8 +27,11 @@ const ProfilePage = () => {
       profile={profile}
       username={username}
       isOwnProfile={isOwnProfile}
+      isFollowing={isFollowing}
       onDeletePost={handleDeletePost}
       onLikePost={handleLikePost}
+      onFollowUser={handleFollowUser}
+      onUnfollowUser={handleUnfollowUser}
     />
   );
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuthStore, usePostStore, useLikeStore } from './useStores';
+import { useAuthStore, usePostStore, useLikeStore, useUserStore } from './useStores';
 import { userService, postService } from '../services/api';
 
 /**
@@ -11,6 +11,7 @@ export const useProfileLogic = () => {
   const authStore = useAuthStore();
   const postStore = usePostStore();
   const likeStore = useLikeStore();
+  const userStore = useUserStore();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,11 +49,11 @@ export const useProfileLogic = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('🌐 API call for username:', username);
-      console.log('🌐 API URL:', `/users/username/${username}`);
-      const response = await userService.getProfile(username);
-      console.log('✅ Profile API response:', response); // Debug log
-      setProfile(response.data.user);
+      console.log('🌐 Fetching profile for username:', username);
+      
+      // Use UserStore to fetch profile (includes follow status check)
+      const profileData = await userStore.fetchProfile(username);
+      setProfile(profileData);
     } catch (error) {
       console.error('❌ Error fetching profile:', error);
       console.error('❌ Error response:', error.response?.data);
@@ -162,6 +163,46 @@ export const useProfileLogic = () => {
     }
   };
 
+  /**
+   * Follow user
+   */
+  const handleFollowUser = async () => {
+    if (!profile) return;
+
+    try {
+      await userStore.followUser(profile.id);
+      
+      // Update local profile state
+      setProfile(prev => ({
+        ...prev,
+        followers_count: (prev.followers_count || 0) + 1
+      }));
+    } catch (error) {
+      console.error('Error following user:', error);
+      alert('Failed to follow user. Please try again.');
+    }
+  };
+
+  /**
+   * Unfollow user
+   */
+  const handleUnfollowUser = async () => {
+    if (!profile) return;
+
+    try {
+      await userStore.unfollowUser(profile.id);
+      
+      // Update local profile state
+      setProfile(prev => ({
+        ...prev,
+        followers_count: Math.max(0, (prev.followers_count || 0) - 1)
+      }));
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+      alert('Failed to unfollow user. Please try again.');
+    }
+  };
+
   return {
     // State
     profile,
@@ -172,9 +213,14 @@ export const useProfileLogic = () => {
     isOwnProfile,
     currentUser: authStore.user,
     
+    // Follow state
+    isFollowing: profile ? userStore.isFollowing(profile.id) : false,
+    
     // Actions
     handleDeletePost,
     handleLikePost,
+    handleFollowUser,
+    handleUnfollowUser,
     refreshProfile,
     refreshPosts,
     

@@ -73,6 +73,35 @@ export const userService = {
   getCurrentUser: async () => {
     const response = await api.get('/users/me');
     return response.data;
+  },
+
+  followUser: async (userId) => {
+    const response = await api.post(`/users/${userId}/follow`);
+    return response.data;
+  },
+
+  unfollowUser: async (userId) => {
+    const response = await api.delete(`/users/${userId}/follow`);
+    return response.data;
+  },
+
+  checkFollowStatus: async (userId) => {
+    const response = await api.get(`/users/${userId}/follow-status`);
+    return response.data;
+  },
+
+  getFollowers: async (userId, page = 1, limit = 50) => {
+    const response = await api.get(`/users/${userId}/followers`, {
+      params: { page, limit }
+    });
+    return response.data;
+  },
+
+  getFollowing: async (userId, page = 1, limit = 50) => {
+    const response = await api.get(`/users/${userId}/following`, {
+      params: { page, limit }
+    });
+    return response.data;
   }
 };
 

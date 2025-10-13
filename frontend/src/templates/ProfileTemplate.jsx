@@ -11,8 +11,11 @@ export const ProfileTemplate = observer(({
   profile,
   username,
   isOwnProfile,
+  isFollowing,
   onDeletePost,
-  onLikePost
+  onLikePost,
+  onFollowUser,
+  onUnfollowUser
 }) => {
   const likeStore = useLikeStore();
   const postStore = usePostStore(); // Get postStore directly in template
@@ -64,10 +67,17 @@ export const ProfileTemplate = observer(({
               )}
             </div>
             
-            {isOwnProfile && (
+            {isOwnProfile ? (
               <Link to="/profile/edit" className="edit-profile-btn">
                 Edit Profile
               </Link>
+            ) : (
+              <button
+                onClick={isFollowing ? onUnfollowUser : onFollowUser}
+                className={`follow-btn ${isFollowing ? 'following' : ''}`}
+              >
+                {isFollowing ? '' : 'Follow'}
+              </button>
             )}
           </div>
 

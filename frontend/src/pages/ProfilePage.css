@@ -114,11 +114,53 @@
   text-decoration: none;
   font-weight: 600;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .edit-profile-btn:hover {
   background: #1da1f2;
   color: white;
+}
+
+.follow-btn {
+  background: #1da1f2;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.follow-btn:hover {
+  background: #1a8cd8;
+}
+
+.follow-btn.following {
+  background: transparent;
+  border: 2px solid #1da1f2;
+  color: #1da1f2;
+  padding: 6px 18px; /* Adjust for border */
+}
+
+.follow-btn.following:hover {
+  background: rgba(244, 33, 46, 0.1);
+  border-color: #f4212e;
+  color: #f4212e;
+}
+
+.follow-btn.following:hover::after {
+  content: ' Unfollow';
+}
+
+.follow-btn.following::before {
+  content: 'Following';
+}
+
+.follow-btn.following:hover::before {
+  content: '';
 }
 
 /* Profile Details */
