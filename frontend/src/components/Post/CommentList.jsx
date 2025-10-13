@@ -64,7 +64,7 @@ const CommentList = observer(({ postId }) => {
             <div className="comment-header">
               <div className="comment-user-info">
                 <span className="comment-username">{comment.full_name || comment.username}</span>
-                {comment.is_verified && (
+                {comment.is_verified === 1 && (
                   <span className="comment-verified">✓</span>
                 )}
                 <span className="comment-handle">@{comment.username}</span>
