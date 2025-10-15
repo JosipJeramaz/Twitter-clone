@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { useAuthStore } from '../../hooks/useStores';
 import { APP_NAME, ROUTES } from '../../constants';
+import NotificationBell from './NotificationBell';
 import './Header.css';
 
 const Header = observer(() => {
@@ -26,6 +27,7 @@ const Header = observer(() => {
         <div className="header-right">
           {authStore.user && (
             <div className="user-menu">
+              <NotificationBell />
               <span className="username">@{authStore.user.username}</span>
               <button onClick={handleLogout} className="logout-btn">
                 Logout

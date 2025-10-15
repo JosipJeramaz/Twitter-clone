@@ -8,6 +8,7 @@ const {
   FollowRepository 
 } = require('../repositories');
 const CommentRepository = require('../repositories/CommentRepository');
+const NotificationRepository = require('../repositories/NotificationRepository');
 
 // Import services
 const { 
@@ -16,12 +17,14 @@ const {
   PostService 
 } = require('../services');
 const CommentService = require('../services/CommentService');
+const NotificationService = require('../services/NotificationService');
 
 // Import controllers
 const AuthController = require('../controllers/AuthController');
 const UserController = require('../controllers/UserController');
 const PostController = require('../controllers/PostController');
 const CommentController = require('../controllers/CommentController');
+const NotificationController = require('../controllers/NotificationController');
 
 /**
  * Configure and register all dependencies
@@ -36,6 +39,7 @@ function configureDependencies() {
   container.registerSingleton('likeRepository', () => new LikeRepository());
   container.registerSingleton('followRepository', () => new FollowRepository());
   container.registerSingleton('commentRepository', () => new CommentRepository());
+  container.registerSingleton('notificationRepository', () => new NotificationRepository());
 
   // Register services as singletons with their dependencies
   container.registerSingleton('authService', (container) => 
@@ -47,7 +51,8 @@ function configureDependencies() {
   container.registerSingleton('userService', (container) => 
     new UserService(
       container.resolve('userRepository'),
-      container.resolve('followRepository')
+      container.resolve('followRepository'),
+      container.resolve('notificationService')
     )
   );
 
@@ -55,14 +60,23 @@ function configureDependencies() {
     new PostService(
       container.resolve('postRepository'),
       container.resolve('likeRepository'),
-      container.resolve('userRepository')
+      container.resolve('userRepository'),
+      container.resolve('notificationService'),
+      container.resolve('followRepository')
     )
   );
 
   container.registerSingleton('commentService', (container) => 
     new CommentService(
       container.resolve('commentRepository'),
-      container.resolve('postRepository')
+      container.resolve('postRepository'),
+      container.resolve('notificationService')
+    )
+  );
+
+  container.registerSingleton('notificationService', (container) => 
+    new NotificationService(
+      container.resolve('notificationRepository')
     )
   );
 
@@ -81,6 +95,10 @@ function configureDependencies() {
 
   container.registerSingleton('commentController', (container) => 
     new CommentController(container.resolve('commentService'))
+  );
+
+  container.registerSingleton('notificationController', (container) => 
+    new NotificationController(container.resolve('notificationService'))
   );
 
   return container;

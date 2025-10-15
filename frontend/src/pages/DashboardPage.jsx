@@ -12,10 +12,12 @@ const DashboardPage = () => {
     loading,
     posting,
     user,
+    feedFilter,
     handlePostChange,
     handleCreatePost,
     handleDeletePost,
-    handleLikePost
+    handleLikePost,
+    handleFilterChange
   } = useDashboardLogic();
 
   return (
@@ -24,10 +26,12 @@ const DashboardPage = () => {
       loading={loading}
       newPost={newPost}
       posting={posting}
+      feedFilter={feedFilter}
       onPostChange={handlePostChange}
       onCreatePost={handleCreatePost}
       onDeletePost={handleDeletePost}
       onLikePost={handleLikePost}
+      onFilterChange={handleFilterChange}
     />
   );
 };

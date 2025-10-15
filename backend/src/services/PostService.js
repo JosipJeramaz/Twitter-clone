@@ -1,5 +1,5 @@
 class PostService {
-  constructor(postRepository, likeRepository, userRepository) {
+  constructor(postRepository, likeRepository, userRepository, notificationService = null, followRepository = null) {
     if (!postRepository) {
       throw new Error('PostRepository is required for PostService');
     }
@@ -12,6 +12,8 @@ class PostService {
     this.postRepository = postRepository;
     this.likeRepository = likeRepository;
     this.userRepository = userRepository;
+    this.notificationService = notificationService; // Optional for now
+    this.followRepository = followRepository; // Optional
   }
 
   // Create new post
@@ -39,6 +41,12 @@ class PostService {
 
       // Update user's post count
       await this.userRepository.updateCounters(userId);
+
+      // Notify followers about new post (async, don't wait)
+      if (this.notificationService && this.followRepository) {
+        this.notificationService.notifyNewPost(userId, newPost.id, this.followRepository)
+          .catch(err => console.error('Error notifying followers:', err));
+      }
 
       // Get post with user info
       const postWithUser = await this.postRepository.getPostWithUser(newPost.id);
@@ -120,6 +128,23 @@ class PostService {
     }
   }
 
+  // Get user's feed (from followed users only)
+  async getFollowingFeed(userId, page = 1, limit = 20) {
+    try {
+      const offset = (page - 1) * limit;
+      const posts = await this.postRepository.getFollowingFeed(userId, limit, offset);
+      
+      return {
+        posts,
+        page,
+        limit,
+        hasMore: posts.length === limit
+      };
+    } catch (error) {
+      throw new Error(`Failed to get following feed: ${error.message}`);
+    }
+  }
+
   // Get user's feed
   async getFeed(userId, page = 1, limit = 20) {
     try {
@@ -192,6 +217,11 @@ class PostService {
       // Update post counters
       await this.postRepository.updateCounters(postId);
 
+      // Create notification for post owner
+      if (this.notificationService && post.user_id !== userId) {
+        await this.notificationService.notifyLike(post.user_id, userId, postId);
+      }
+
       return { message: 'Post liked successfully' };
     } catch (error) {
       throw new Error(`Failed to like post: ${error.message}`);
@@ -212,6 +242,11 @@ class PostService {
 
       // Update post counters
       await this.postRepository.updateCounters(postId);
+
+      // Remove notification for post owner
+      if (this.notificationService && post.user_id !== userId) {
+        await this.notificationService.removeNotifyLike(post.user_id, userId, postId);
+      }
 
       return { message: 'Post unliked successfully' };
     } catch (error) {

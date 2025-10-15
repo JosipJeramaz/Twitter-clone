@@ -1,7 +1,8 @@
 class CommentService {
-  constructor(commentRepository, postRepository) {
+  constructor(commentRepository, postRepository, notificationService = null) {
     this.commentRepository = commentRepository;
     this.postRepository = postRepository;
+    this.notificationService = notificationService; // Optional for now
   }
 
   // Get comments for a post
@@ -42,6 +43,11 @@ class CommentService {
 
       // Update post comments count
       await this.postRepository.updateCounters(postId);
+
+      // Create notification for post owner
+      if (this.notificationService && post.user_id !== userId) {
+        await this.notificationService.notifyComment(post.user_id, userId, postId);
+      }
 
       // Get comment with user info
       const commentWithUser = await this.commentRepository.findByIdWithUser(comment.id);

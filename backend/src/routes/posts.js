@@ -26,6 +26,9 @@ function createPostRoutes(container) {
   // Get public timeline
   router.get('/timeline', optionalAuth, paginationValidation, postController.getPublicTimeline);
 
+  // Get following feed (posts from users you follow only)
+  router.get('/feed/following', auth, paginationValidation, postController.getFollowingFeed);
+
   // Get user's feed (following posts)
   router.get('/feed', auth, paginationValidation, postController.getFeed);
 

@@ -9,6 +9,7 @@ export const useDashboardLogic = () => {
   const [newPost, setNewPost] = useState('');
   const [loading, setLoading] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [feedFilter, setFeedFilter] = useState('all'); // 'all' or 'following'
   const authStore = useAuthStore();
   const postStore = usePostStore();
   const likeStore = useLikeStore();
@@ -18,22 +19,27 @@ export const useDashboardLogic = () => {
   console.log('  - user:', authStore.user);
   console.log('  - isAuthenticated:', authStore.isAuthenticated);
   console.log('  - authLoading:', authStore.loading);
+  console.log('  - feedFilter:', feedFilter);
 
   useEffect(() => {
     // Only load posts when user is authenticated and loaded
     if (authStore.user && authStore.isAuthenticated && !authStore.loading) {
       loadPosts();
     }
-  }, [authStore.user, authStore.isAuthenticated, authStore.loading]);
+  }, [authStore.user, authStore.isAuthenticated, authStore.loading, feedFilter]);
 
   /**
-   * Load posts from timeline
+   * Load posts from timeline based on filter
    */
   const loadPosts = async () => {
     try {
       setLoading(true);
-      console.log('📥 Loading posts...');
-      const data = await postService.getAllPosts();
+      console.log(`📥 Loading posts with filter: ${feedFilter}`);
+      
+      const data = feedFilter === 'following' 
+        ? await postService.getFollowingPosts() 
+        : await postService.getAllPosts();
+        
       console.log('✅ Posts loaded:', data);
       const posts = data.data.posts || [];
       
@@ -151,6 +157,13 @@ export const useDashboardLogic = () => {
   };
 
   /**
+   * Handle feed filter change
+   */
+  const handleFilterChange = (filter) => {
+    setFeedFilter(filter);
+  };
+
+  /**
    * Refresh timeline
    */
   const refreshTimeline = () => {
@@ -164,12 +177,14 @@ export const useDashboardLogic = () => {
     loading,
     posting,
     user: authStore.user,
+    feedFilter,
     
     // Actions
     handlePostChange,
     handleCreatePost,
     handleDeletePost,
     handleLikePost,
+    handleFilterChange,
     refreshTimeline,
     
     // Utilities

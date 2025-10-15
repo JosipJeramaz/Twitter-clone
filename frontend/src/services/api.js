@@ -107,8 +107,17 @@ export const userService = {
 
 // Post service
 export const postService = {
-  getAllPosts: async () => {
-    const response = await api.get('/posts/timeline');
+  getAllPosts: async (page = 1, limit = 20) => {
+    const response = await api.get('/posts/timeline', {
+      params: { page, limit }
+    });
+    return response.data;
+  },
+
+  getFollowingPosts: async (page = 1, limit = 20) => {
+    const response = await api.get('/posts/feed/following', {
+      params: { page, limit }
+    });
     return response.data;
   },
 
@@ -159,6 +168,36 @@ export const commentService = {
 
   deleteComment: async (postId, commentId) => {
     const response = await api.delete(`/posts/${postId}/comments/${commentId}`);
+    return response.data;
+  }
+};
+
+// Notification service
+export const notificationService = {
+  getNotifications: async (page = 1, limit = 20) => {
+    const response = await api.get('/notifications', {
+      params: { page, limit }
+    });
+    return response.data;
+  },
+
+  getUnreadCount: async () => {
+    const response = await api.get('/notifications/unread-count');
+    return response.data;
+  },
+
+  markAsRead: async (notificationId) => {
+    const response = await api.put(`/notifications/${notificationId}/read`);
+    return response.data;
+  },
+
+  markAllAsRead: async () => {
+    const response = await api.put('/notifications/read-all');
+    return response.data;
+  },
+
+  deleteNotification: async (notificationId) => {
+    const response = await api.delete(`/notifications/${notificationId}`);
     return response.data;
   }
 };

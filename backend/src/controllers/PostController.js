@@ -71,6 +71,24 @@ class PostController {
     }
   };
 
+  // Get following feed (posts from users you follow only)
+  getFollowingFeed = async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 20;
+
+      const result = await this.postService.getFollowingFeed(userId, page, limit);
+      
+      res.status(200).json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // Get user's feed
   getFeed = async (req, res, next) => {
     try {

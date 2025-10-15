@@ -129,6 +129,19 @@ class FollowRepository extends BaseRepository {
       throw new Error(`Error getting following count: ${error.message}`);
     }
   }
+
+  // Get all followers of a user (for notifications)
+  async getFollowers(userId) {
+    try {
+      const [rows] = await this.db.execute(
+        'SELECT follower_id FROM follows WHERE following_id = ?',
+        [userId]
+      );
+      return rows;
+    } catch (error) {
+      throw new Error(`Error getting followers: ${error.message}`);
+    }
+  }
 }
 
 module.exports = FollowRepository;

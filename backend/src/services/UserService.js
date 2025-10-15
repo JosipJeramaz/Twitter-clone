@@ -1,5 +1,5 @@
 class UserService {
-  constructor(userRepository, followRepository) {
+  constructor(userRepository, followRepository, notificationService = null) {
     if (!userRepository) {
       throw new Error('UserRepository is required for UserService');
     }
@@ -8,6 +8,7 @@ class UserService {
     }
     this.userRepository = userRepository;
     this.followRepository = followRepository;
+    this.notificationService = notificationService; // Optional for now
   }
 
   // Get user profile by ID
@@ -98,6 +99,11 @@ class UserService {
       await this.userRepository.updateCounters(followerId);
       await this.userRepository.updateCounters(followingId);
 
+      // Create notification for followed user
+      if (this.notificationService) {
+        await this.notificationService.notifyFollow(followingId, followerId);
+      }
+
       return { message: 'User followed successfully' };
     } catch (error) {
       throw new Error(`Failed to follow user: ${error.message}`);
@@ -113,6 +119,11 @@ class UserService {
       // Update counters
       await this.userRepository.updateCounters(followerId);
       await this.userRepository.updateCounters(followingId);
+
+      // Remove notification for unfollowed user
+      if (this.notificationService) {
+        await this.notificationService.removeNotifyFollow(followingId, followerId);
+      }
 
       return { message: 'User unfollowed successfully' };
     } catch (error) {
