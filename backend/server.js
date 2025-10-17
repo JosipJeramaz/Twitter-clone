@@ -30,10 +30,36 @@ app.use(passport.initialize());
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}));
+
+// Configure CORS to allow mobile access
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ];
+    
+    // Allow any origin in development that's not from a suspicious domain
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://192.168.') || origin.startsWith('http://10.')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting (development settings)
 const limiter = rateLimit({
@@ -82,9 +108,11 @@ webSocketService.initialize(server);
 // Make webSocketService available globally for services
 global.webSocketService = webSocketService;
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
-  console.log(`📡 WebSocket server ready at ws://localhost:${PORT}/ws/notifications`);
+  console.log(`📡 WebSocket server ready at ws://0.0.0.0:${PORT}/ws/notifications`);
+  console.log(`📱 Server accessible from network at: http://0.0.0.0:${PORT}`);
+  console.log(`💡 To access from mobile, use your computer's IP address (e.g., http://192.168.x.x:${PORT})`);
 });

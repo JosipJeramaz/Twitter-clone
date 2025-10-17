@@ -8,23 +8,24 @@
   position: relative;
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
-  padding: 8px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  border-radius: 20px;
+  transition: all 0.2s;
 }
 
 .notification-bell-button:hover {
-  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .notification-badge {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 2px;
+  right: 2px;
   background: #f4212e;
   color: white;
   border-radius: 10px;
@@ -229,9 +230,21 @@
 }
 
 /* Mobile Responsive */
+@media (max-width: 768px) {
+  .notification-bell-button {
+    padding: 6px 10px;
+    font-size: 18px;
+  }
+}
+
 @media (max-width: 480px) {
   .notification-dropdown {
     width: calc(100vw - 32px);
     right: -100px;
+  }
+  
+  .notification-bell-button {
+    padding: 6px 10px;
+    font-size: 18px;
   }
 }

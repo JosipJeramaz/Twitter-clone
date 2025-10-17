@@ -1,6 +1,7 @@
 // NotificationStore.js - Real-time notifications management with WebSocket
 import { makeAutoObservable, runInAction } from 'mobx';
 import { notificationService } from '../services/api';
+import { WS_BASE_URL } from '../constants';
 
 class NotificationStore {
   notifications = [];
@@ -37,9 +38,9 @@ class NotificationStore {
     }
 
     try {
-      const wsUrl = `ws://localhost:5000/ws/notifications?token=${token}`;
+      const wsUrl = `${WS_BASE_URL}/ws/notifications?token=${token}`;
       
-      console.log(`🔌 Connecting to WebSocket...`);
+      console.log(`🔌 Connecting to WebSocket: ${wsUrl}`);
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
@@ -60,13 +61,16 @@ class NotificationStore {
         }
       };
 
-      this.ws.onerror = () => {
+      this.ws.onerror = (error) => {
+        console.error('❌ WebSocket error:', error);
+        console.error('WebSocket URL was:', wsUrl);
         runInAction(() => {
           this.wsConnecting = false;
         });
       };
 
       this.ws.onclose = (event) => {
+        console.log(`🔌 WebSocket closed. Code: ${event.code}, Reason: ${event.reason || 'No reason'}`);
         runInAction(() => {
           this.wsConnected = false;
           this.wsConnecting = false;
@@ -75,9 +79,13 @@ class NotificationStore {
         // Auto-reconnect only if not normal closure
         if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
+          const delay = 2000 * this.reconnectAttempts;
+          console.log(`🔄 Reconnecting in ${delay}ms... (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
           setTimeout(() => {
             this.connectWebSocket();
-          }, 2000 * this.reconnectAttempts);
+          }, delay);
+        } else if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+          console.error('❌ Max reconnection attempts reached. Please refresh the page.');
         }
       };
     } catch (error) {

@@ -17,8 +17,6 @@ const Sidebar = observer(() => {
       icon: '👤',
       disabled: !authStore.user?.username
     },
-    { path: '/notifications', label: 'Notifications', icon: '🔔' },
-    { path: '/messages', label: 'Messages', icon: '💬' },
   ];
 
   return (

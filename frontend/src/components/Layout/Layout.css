@@ -7,13 +7,14 @@
 .layout-content {
   display: flex;
   flex: 1;
-  max-width: 1200px;
-  margin: 0 auto;
+  justify-content: center;
   width: 100%;
 }
 
 .main-content {
   flex: 1;
+  max-width: 800px;
+  width: 100%;
   padding: 20px;
   border-left: 1px solid #333;
   border-right: 1px solid #333;
@@ -21,13 +22,15 @@
 }
 
 @media (max-width: 768px) {
-  .layout-content {
-    flex-direction: column;
-  }
-  
   .main-content {
     border-left: none;
     border-right: none;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
     padding: 10px;
   }
 }

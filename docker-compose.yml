@@ -16,8 +16,10 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
-      - ./database/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
-      - ./database/add_oauth_support.sql:/docker-entrypoint-initdb.d/3-add_oauth_support.sql
+      - ./database/add_oauth_support.sql:/docker-entrypoint-initdb.d/2-add_oauth_support.sql
+      - ./database/update_schema.sql:/docker-entrypoint-initdb.d/3-update_schema.sql
+      - ./database/add_new_post_notification_type.sql:/docker-entrypoint-initdb.d/4-add_new_post_notification_type.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/5-seed.sql
     networks:
       - twitter_network
 
@@ -32,11 +34,15 @@ services:
       - "5000:5000"
     environment:
       NODE_ENV: development
+      PORT: 5000
       DB_HOST: mysql
+      DB_PORT: 3306
       DB_USER: twitter_user
       DB_PASSWORD: twitter_password
       DB_NAME: twitter_clone
       JWT_SECRET: your_super_secret_jwt_key_here
+      JWT_EXPIRES_IN: 7d
+      FRONTEND_URL: http://localhost:3000
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -56,6 +62,8 @@ services:
       - "3000:3000"
     environment:
       REACT_APP_API_URL: http://localhost:5000/api
+      REACT_APP_WS_URL: ws://localhost:5000
+      CHOKIDAR_USEPOLLING: "true"
     volumes:
       - ./frontend:/app
       - /app/node_modules

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { useAuthStore } from '../../hooks/useStores';
 import { APP_NAME, ROUTES } from '../../constants';
@@ -9,6 +9,7 @@ import './Header.css';
 const Header = observer(() => {
   const authStore = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -21,7 +22,30 @@ const Header = observer(() => {
     <header className="header">
       <div className="header-content">
         <div className="header-left">
-          <h1 className="logo">{APP_NAME}</h1>
+          <h1 className="logo" onClick={() => navigate(ROUTES.DASHBOARD)} style={{ cursor: 'pointer' }}>
+            {APP_NAME}
+          </h1>
+          
+          {/* Navigation Menu */}
+          {authStore.user && (
+            <nav className="header-nav">
+              <Link 
+                to={ROUTES.DASHBOARD} 
+                className={`header-nav-item ${location.pathname === ROUTES.DASHBOARD ? 'active' : ''}`}
+              >
+                <span className="nav-icon">🏠</span>
+                <span className="nav-label">Home</span>
+              </Link>
+              
+              <Link 
+                to={authStore.user?.username ? `/profile/${authStore.user.username}` : '/profile'} 
+                className={`header-nav-item ${location.pathname.startsWith('/profile') ? 'active' : ''}`}
+              >
+                <span className="nav-icon">👤</span>
+                <span className="nav-label">Profile</span>
+              </Link>
+            </nav>
+          )}
         </div>
         
         <div className="header-right">
